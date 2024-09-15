@@ -69,7 +69,44 @@ monthNext : forward => {
     cal.draw()
     },
 
+//draw selected month
+draw : () => {
+    cal.sMth = parseInt(cal.hMth.value);
+    cal.sYear = parseInt(cal.hYear.value);
+    let daysInMth = new Date(cal.sYear, cal.sMth+1, 0).getDate(), 
+        startDay = new Date(cal.sYear, cal.sMth, 1).getDay(),
+        endDay = new Date(cal.sYear, cal.sMth, daysInMth).getDay(),
+        now = new Date(),
+        nowMth = now.getMonth(),
+        nowYear = parseInt(now.getFullYear()),
+        nowDay = cal.smth==nowMth && cal.sYear==nowYear ? now.getDate() : null ; 
 
+        //Load info from local storage
+    cal.data = localStorage.getItem("cal-" + cal.sMth + "-" + cal.sYear);
+    if (cal.data==null) {
+        localStorage.setItem("cal-" + cal.sMth + "-" + cal.sYear, "{}")
+        cal.data = {};
+    } else {
+        cal.data = JSON.parse(cal.data); 
+    }
+
+//start the squares
+//blank squares of start of month
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
 
 
 };
