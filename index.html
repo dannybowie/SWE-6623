@@ -3,24 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Calendar</title>
-    <link rel="stylesheet" href="CSS/styles.css">
+    <title>HR Event Calendar</title>
 </head>
 <body>
-    <div class="calendar-container">
-        <h2 id="month-year"></h2>
-        <table id="calendar-table">
-            <thead>
-                <tr>
-                    <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th>
-                </tr>
-            </thead>
-            <tbody id="calendar-body"></tbody>
-        </table>
-        <button id="prev-month">Previous Month</button>
-        <button id="next-month">Next Month</button>
+    <!--month selector-->
+    <div id="calPeriod">
+        <input calBack type="button" value="#lt">
+        <select id="calMonth"></select>
+        <input type="number" id="calYear">
+        <input id="calNext" type="button" value="&gt">
     </div>
 
-    <script src="script.js"></script>
+    <!--calendar-->
+    <div id="calWrap"></div>
+
+    <dialog id="calForm"><form method="dialog">
+        <div id="evtClose">X</div>
+        <h2>Calendar Event</h2>
+        <label>Date</label>
+        <input type="text" id="evtDate" readonly>
+        <label >Details</label>
+        <textarea id="evtTxt" required></textarea>
+
+        <input id="evtDel" type="button" value="Delete">
+        <input type="submit" value="evtSave" value="Save">
+
+
+    </form></dialog>
+    <div></div>
+
 </body>
 </html>

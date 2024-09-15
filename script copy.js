@@ -31,9 +31,9 @@ init : () => {
         opt.value = i;
         opt.innerHTML = cal.months[i];
         if (i==nowMth) {opt.selected = true}; 
-    
-    cal.data,hMth.appendChild(opt);
     }
+    cal.data,hMth.appendChild(opt);
+}
 
     cal.hMth.onchange = cal.draw;
     cal.hYear.onchange = cal.draw;
@@ -48,6 +48,10 @@ init : () => {
     }
     cal.draw();
 },
+
+
+
+
 
 };
 window.onload = cal.init;    
