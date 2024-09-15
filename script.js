@@ -3,6 +3,7 @@ var cal ={
     data : null,
     sDay : 0, sMth : 0, sYear : 0,
 
+    //set month and days by name
 months : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
 
 ],
@@ -10,10 +11,11 @@ months : ["January", "February", "March", "April", "May", "June", "July", "Augus
 days : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 
 ],
-
+//setting up html elements
 hMth : null, hYear : null, hWrap : null, hFormWrap : null, hForm : null, hfDate : null, hfTxt : null, hfDel : null, 
 
 init : () => {
+    //get the HTML elements
     cal.hMth = document.getElementById("calMonth");
     cal.hYear = document.getElementById("calYear");
     cal.hWrap = document.getElementById("calWrap");
@@ -23,7 +25,7 @@ init : () => {
     cal.hfTxt = document.getElementById("evtTxt");
     cal.hfDel = document.getElementById("evtDel");
 
-
+    //ordering months and year
     let now = new Date(), nowMth = now.getMonth();
     cal.hYear.value = parseInt(now.getFullYear);
     for (let i=0; i<12; i++) {
@@ -35,19 +37,41 @@ init : () => {
     cal.data,hMth.appendChild(opt);
     }
 
+    //setting up clicks/controls
     cal.hMth.onchange = cal.draw;
     cal.hYear.onchange = cal.draw;
-    document.getElementById("calBack").onclick = () => cal.pshift();
-    document.getElementById("calNext").onclick = () => cal.pshift(1);
+    document.getElementById("calBack").onclick = () => cal.monthNext();
+    document.getElementById("calNext").onclick = () => cal.monthNext(1);
     cal.hForm.onsubmit = cal.save;
     document.getElementById("evtClose").onclick = () => cal.hFormWrap.close();
     cal.hfDel.onclick = cal.del;
 
+    //initialize drawing of calendar
     if (cal.sMon) {
         cal.days.push(cal.days.shift());
     }
     cal.draw();
 },
 
+//change month
+monthNext : forward => {
+    cal.sMth = parseInt(cal.hMth.value);
+    cal.sYear = parent(cal.hYear.value);
+    if (forward) {
+        cal.sMth++;
+    } else {
+        cal.sMth--;
+    }
+    if (cal.sMth > 11) { calsMth = 0; cal.sYear++;}
+    if (cal.sMth < 0) {calsMth = 11; cal.sYear--;}
+    cal.hMth.value = cal.sMth;
+    cal.hYear.value = cal.sYear;
+    cal.draw()
+    },
+
+
+
+
 };
-window.onload = cal.init;    
+window.onload = cal.init;  
+
