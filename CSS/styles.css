@@ -57,6 +57,10 @@
     font-weight: 700;
     color: #b5b5b5;
   }
+
+  .cellDate:hover {
+    cursor: pointer;
+  }
   .evt {
     font-size: 14px;
     white-space: nowrap; text-overflow: ellipsis;
@@ -81,6 +85,8 @@
     border-radius: 10px;
     background: #fff;
   }
+
+  
   #evtClose {
     position: absolute;
     top: 0; right: 0;
@@ -104,6 +110,12 @@
     margin-bottom: 10px;
     border: 1px solid #eee;
     background: #f5f5f5;
+  }
+
+  #calForm select {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid;
   }
   #calForm textarea {
     height: 100px;
