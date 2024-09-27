@@ -152,6 +152,39 @@ var cal = {
         
       });
 
+      const employees = {
+        emp1: {
+          fName: "Jalen",
+          lName: "Hurts",
+          dept: "HR"
+        },
+        emp1: {
+          fName: "Bijan",
+          lName: "Robinson",
+          dept: "IT"
+        },
+        emp1: {
+          fName: "Micah",
+          lName: "Parsons",
+          dept: "Sales"
+        },
+        emp1: {
+          fName: "Tyreek",
+          lName: "Hill",
+          dept: "Infrastructure"
+        },
+        emp1: {
+          fName: "Joe",
+          lName: "Burrow",
+          dept: "HR"
+        },
+
+      };
+
+      var empDrop = document.getElementById("evtEmp");
+
+      
+
       // (D5) CALENDAR HEADER - DAY NAMES
       wrap = cal.hWrap.querySelector(".calHead");
       for (let d of cal.days) {

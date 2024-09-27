@@ -36,13 +36,20 @@
     <dialog id="calForm"><form method="dialog">
       <div id="evtClose">X</div>
       <h2>CALENDAR EVENT</h2>
-      <label for="Description">Description</label>
-      <input type="text" id="description">
       <label>Date</label>
       <input type="text" id="evtDate" readonly>
+      <label for="Description">Description</label>
+      <input type="text" id="description">
+      
       <div id="dropDown">
         <label for="evtType">Event Type</label>
         <select name="evtType" id="evtType" required>
+        <option></option>
+        </select>
+      </div>
+      <div id="empDrop"></div>
+        <label for="evtEmp">Employee</label>
+        <select name="evtEmp" id="evtEmp" required>
         <option></option>
         </select>
       </div>
