@@ -1,24 +1,31 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title></title>
+    <meta charset="utf-8">
+    <title>HR Event Calendar</title>
     <link href="CSS/styles.css" rel="stylesheet">
-    <script defer src="script.js"></script>
+    <script defer="" src="script.js"></script>
   </head>
   <body>
 
     <!-- EVENTS BAR-->
-     <div id="eventsBar">
-
+     <div id="columnList">
+      <div class="columnItem" style="background-color: #ffcccb; border: solid 2px;">Employee Anniversary Date</div>
+      <div class="columnItem" style="background-color: #ffff00; border: solid 2px;">Employee Birthday</div>
+      <div class="columnItem" style="background-color: #0000ff; border: solid 2px;">Company Events</div>
+      <div class="columnItem" style="background-color: #ffa500; border: solid 2px;">Company Holidays</div>
+      <div class="columnItem" style="background-color: #808080; border: solid 2px;">Out of the Office</div>
+      <div class="columnItem" style="background-color: #00ff00; border: solid 2px;">Personal Time</div>
+      <div class="columnItem" style="background-color: #800080; border: solid 2px;">Training</div>
+      <div class="columnItem" style="background-color: #ff00ff; border: solid 2px;">Visitor</div>
+      <div class="columnItem" style="background-color: #ff0000; border: solid 2px;">Sick Day</div>
 
      </div>
 
     <!-- NAVIGATION -->
     <div id="calPeriod">
       <input id="calBack" type="button" value="&lt;">
-      <select id="calMonth"></select>
-      <input type="number" id="calYear">
-      <input id="calNext" type="button" value="&gt;">
+      <select id="calMonth"></select>   0 ernv4t5tyhrertyeghnnnmjngjuhtgytrghgyyuthjjjjjjhggfffffbfbfb
     </div>
 
     <!-- CALENDAR -->
@@ -28,20 +35,14 @@
     <dialog id="calForm"><form method="dialog">
       <div id="evtClose">X</div>
       <h2>CALENDAR EVENT</h2>
+      <label for="Description">Description</label>
+      <input type="text" id="description">
       <label>Date</label>
       <input type="text" id="evtDate" readonly>
       <div id="dropDown">
         <label for="evtType">Event Type</label>
         <select name="evtType" id="evtType" required>
-          <option value="Employee Anniversary Date">Employee Anniversary Date</option>
-          <option value="Employee Birthday">Employee Birthday</option>
-          <option value="Company Events">Company Events</option>
-          <option value="Company Holidays">Company Holidays</option>
-          <option value="Out of the Office">Out of the Office</option>
-          <option value="Personal Time">Personal Time (Vacation)</option>
-          <option value="Training">Training</option>
-          <option value="Visitor">Visitor</option>
-          <option value="Sick Day">Sick Day</option>
+        <option></option>
         </select>
       </div>
       <label>Details</label>

@@ -26,10 +26,6 @@
     cursor: pointer;
   }
   #calPeriod option { color: #000; }
-  #calYear {
-    width: 100px;
-    margin-left: 10px;
-  }
   
   /* (C) CALENDAR */
   /* (C1) SHARED */
@@ -43,7 +39,7 @@
     padding: 15px 0;
   }
   
-  /* (C3) BODY - INDIVIDUAL DAYS */
+    /* (C3) BODY - INDIVIDUAL DAYS */
   .calBlank { background: #eee; }
   .calToday { background: #feffd3; }
   .calToday .cellDate { color: #ff9b9b; }
@@ -70,9 +66,16 @@
   
   /* (D) EVENT FORM */
   #calForm {
-    position: absolute; top: 0; left: 0; z-index: 999;
-    width: 100vw; height: 100%; min-height: 100vh;
-    padding: 0; margin: 0; border: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    width: 50%; /* Increased from 40% */
+    height: 80%; /* Increased from 100% */
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: rgba(0,0,0,0.5);
     background: rgba(0,0,0,0.5);
   }
   #calForm:is([open]) {
@@ -126,3 +129,19 @@
     color: #fff; background: var(--bg-color-c);
     cursor: pointer;
   }
+
+
+  #columnList {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .columnItem {
+    background-color: #ffcccb;
+    border: solid 2px;
+    padding: 10px;
+    text-align: center;
+    width: calc(100% / 9); /* Adjust based on number of items */
+  }
+

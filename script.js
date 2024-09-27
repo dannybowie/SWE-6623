@@ -11,6 +11,18 @@ var cal = {
       "July", "August", "September", "October", "November", "December"
     ],
     days : ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"],
+
+    // EVENTS
+    events : [
+      "Employee Anniversary Date", "Employee Birthday",
+        "Company Events",
+        "Company Holidays",
+        "Out of the Office",
+        "Personal Time",
+        "Training",
+        "Visitor",
+        "Sick Day",
+  ],
   
     // (A3) HTML ELEMENTS
     hMth : null, hYear : null, // month/year selector
@@ -118,7 +130,28 @@ var cal = {
       <div class="calBody">
         <div class="calRow"></div>
       </div>`;
-  
+
+      var events = [
+        "Employee Anniversary Date", "Employee Birthday",
+          "Company Events",
+          "Company Holidays",
+          "Out of the Office",
+          "Personal Time",
+          "Training",
+          "Visitor",
+          "Sick Day",
+    ];
+      
+      var dropdown = document.getElementById("evtType");
+
+      events.forEach(function(option) {
+        var opt = document.createElement("option");
+        opt.value = option;
+        opt.textContent = option;
+        dropdown.appendChild(opt);
+        
+      });
+
       // (D5) CALENDAR HEADER - DAY NAMES
       wrap = cal.hWrap.querySelector(".calHead");
       for (let d of cal.days) {
@@ -131,20 +164,53 @@ var cal = {
       // (D6) CALENDAR BODY - INDIVIDUAL DAYS & EVENTS
       wrap = cal.hWrap.querySelector(".calBody");
       row = cal.hWrap.querySelector(".calRow");
+
       for (let i=0; i<squares.length; i++) {
-        // (D6-1) GENERATE CELL
-        let cell = document.createElement("div");
-        cell.className = "calCell";
-        if (nowDay==squares[i]) { cell.classList.add("calToday"); }
-        if (squares[i]=="b") { cell.classList.add("calBlank"); }
-        else {
-          cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
-          if (cal.data[squares[i]]) {
-            cell.innerHTML += "<div class='evt'>" + cal.data[squares[i]] + "</div>";
-          }
-          cell.onclick = () => { cal.show(cell); };
+      // (D6-1) GENERATE CELL
+      let cell = document.createElement("div");
+      cell.className = "calCell";
+    
+      if (nowDay==squares[i]) { cell.classList.add("calToday"); }
+      if (squares[i]=="b") { cell.classList.add("calBlank"); }
+      else {
+        cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
+        
+        if (cal.data[squares[i]]) {
+            const event = cal.data[squares[i]];
+            cell.style.backgroundColor = getEventColor(event.type);
+            
+            cell.innerHTML += `<div class='evt'>${event.type}: ${event.description}</div>`;
         }
-        row.appendChild(cell);
+        
+        cell.onclick = () => { cal.show(cell); };
+    }
+
+    function getEventColor(eventType) {
+      switch (eventType) {
+          case "Employee Anniversary Date":
+              return "#ffcccb"; // Pastel pink
+          case "Employee Birthday":
+              return "#ffff00"; // Yellow
+          case "Company Events":
+              return "#0000ff"; // Blue
+          case "Company Holidays":
+              return "#ffa500"; // Orange
+          case "Out of the Office":
+              return "#808080"; // Gray
+          case "Personal Time":
+              return "#00ff00"; // Green
+          case "Training":
+              return "#800080"; // Purple
+          case "Visitor":
+              return "#ff00ff"; // Magenta
+          case "Sick Day":
+              return "#ff0000"; // Red
+          default:
+              return "#ffffff"; // White
+      }
+  }
+    
+    row.appendChild(cell);
   
         // (D6-2) NEXT ROW
         if (i!=(squares.length-1) && i!=0 && (i+1)%7==0) {
@@ -169,7 +235,12 @@ var cal = {
   
     // (F) SAVE EVENT
     save : () => {
-      cal.data[cal.sDay] = cal.hfTxt.value;
+      const eventType = document.getElementById("evtType").value;
+      cal.data[cal.sDay] = {
+        type: eventType,
+        description: cal.hfTxt.value
+      };
+      
       localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
       cal.draw();
       cal.hFormWrap.close();
