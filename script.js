@@ -181,10 +181,9 @@ var cal = {
 
       };
 
-      var empDrop = document.getElementById("evtEmp");
+      var dropdown2 = document.getElementById("emp");
 
       
-
       // (D5) CALENDAR HEADER - DAY NAMES
       wrap = cal.hWrap.querySelector(".calHead");
       for (let d of cal.days) {
