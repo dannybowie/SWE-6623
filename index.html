@@ -1,36 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+  <head>
+    <meta charset="utf-8">
     <title>HR Event Calendar</title>
-</head>
-<body>
-    <!--month selector-->
+    <link href="CSS/styles.css" rel="stylesheet">
+    <script defer="" src="script.js"></script>
+  </head>
+  <body>
+
+    <!-- EVENTS BAR-->
+     <div id="columnList">
+      <div class="columnItem" style="background-color: #ffcccb; border: solid 2px;">Employee Anniversary Date</div>
+      <div class="columnItem" style="background-color: #ffff00; border: solid 2px;">Employee Birthday</div>
+      <div class="columnItem" style="background-color: #0000ff; border: solid 2px;">Company Events</div>
+      <div class="columnItem" style="background-color: #ffa500; border: solid 2px;">Company Holidays</div>
+      <div class="columnItem" style="background-color: #808080; border: solid 2px;">Out of the Office</div>
+      <div class="columnItem" style="background-color: #00ff00; border: solid 2px;">Personal Time</div>
+      <div class="columnItem" style="background-color: #800080; border: solid 2px;">Training</div>
+      <div class="columnItem" style="background-color: #ff00ff; border: solid 2px;">Visitor</div>
+      <div class="columnItem" style="background-color: #ff0000; border: solid 2px;">Sick Day</div>
+     </div>
+
+    <!-- NAVIGATION -->
     <div id="calPeriod">
-        <input calBack type="button" value="#lt">
-        <select id="calMonth"></select>
-        <input type="number" id="calYear">
-        <input id="calNext" type="button" value="&gt">
+      <input id="calBack" type="button" value="&lt;">
+      <select id="calMonth"></select>
+      <input type="number" id="calYear">
+      <input id="calNext" type="button" value="&gt;">
     </div>
 
-    <!--calendar-->
+    <!-- CALENDAR -->
     <div id="calWrap"></div>
 
+    <!-- EVENT FORM -->
     <dialog id="calForm"><form method="dialog">
-        <div id="evtClose">X</div>
-        <h2>Calendar Event</h2>
-        <label>Date</label>
-        <input type="text" id="evtDate" readonly>
-        <label >Details</label>
-        <textarea id="evtTxt" required></textarea>
+      <div id="evtClose">X</div>
+      <h2>CALENDAR EVENT</h2>
+      <label>Date</label>
+      <input type="text" id="evtDate" readonly>
+      <label for="evtType">Event Type</label>
+        
+        <select name="evtType" id="evtType" required>
+        <option></option>
+        </select>
+        <label for="emp">Employee</label>
+        <select name="emp" id="emp" required>
+        <option></option>
+        </select>
+      </div>
+      <label>Details</label>
+      <textarea id="evtTxt" required></textarea>
 
-        <input id="evtDel" type="button" value="Delete">
-        <input type="submit" value="evtSave" value="Save">
-
-
+      <input id="evtDel" type="button" value="Delete">
+      <input id="evtSave" type="submit" value="Save">
     </form></dialog>
-    <div></div>
-
-</body>
+  </body>
 </html>
