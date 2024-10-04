@@ -63,24 +63,33 @@
     overflow: hidden;
     cursor: pointer;
   }
+
+  .emp {
+    font-size: 14px;
+    white-space: nowrap; text-overflow: ellipsis;
+    overflow: hidden;
+    cursor: pointer;
+  }
   
   /* (D) EVENT FORM */
   #calForm {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     z-index: 999;
-    width: 50%; /* Increased from 40% */
-    height: 80%; /* Increased from 100% */
+    width: 50%;
+    height: 80%;
     padding: 0;
     margin: 0;
     border: 0;
     background: rgba(0,0,0,0.5);
-    background: rgba(0,0,0,0.5);
   }
   #calForm:is([open]) {
-    display: flex; flex-wrap: wrap;
-    align-items: center; justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
   }
   #calForm form {
     position: relative;
@@ -115,7 +124,25 @@
     background: #f5f5f5;
   }
 
+  /* Update existing styles */
   #calForm select {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid;
+    width: 100%;
+  }
+
+  /* New style for evtType select */
+  #evtType {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid;
+  }
+
+  /* New style for employee select */
+  #emp {
+    width: 100%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid;
