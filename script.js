@@ -1,4 +1,4 @@
-// Import the functions you need from the SDKs you need
+/* // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -35,7 +35,7 @@ addDoc(usersRef, {
   console.error('Error adding document:', error);
 });
 
-addDoc();
+addDoc(); */
 
 
 var cal = {
