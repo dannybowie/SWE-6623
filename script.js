@@ -1,3 +1,43 @@
+/* // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCxsEV7XU95eMCcYaWTQsr_1lpjlBOVOJ4",
+  authDomain: "ksu-swe-project.firebaseapp.com",
+  projectId: "ksu-swe-project",
+  storageBucket: "ksu-swe-project.appspot.com",
+  messagingSenderId: "990956535258",
+  appId: "1:990956535258:web:bf143b1426f42309dc94e3",
+  measurementId: "G-1250NG4CKM"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// Get a reference to the collection
+const usersRef = collection(db, 'users');
+
+// Add a new document
+addDoc(usersRef, {
+  name: 'John Doe',
+  email: 'john.doe@example.com'
+})
+.then((docRef) => {
+  console.log('Document written with ID:', docRef.id);
+})
+.catch((error) => {
+  console.error('Error adding document:', error);
+});
+
+addDoc(); */
+
+
 var cal = {
     // (A) PROPERTIES
     // (A1) FLAGS & DATA
@@ -152,38 +192,27 @@ var cal = {
         
       });
 
+      createEmployeeOptions();
+      function createEmployeeOptions() {
       const employees = {
-        emp1: {
-          fName: "Jalen",
-          lName: "Hurts",
-          dept: "HR"
-        },
-        emp1: {
-          fName: "Bijan",
-          lName: "Robinson",
-          dept: "IT"
-        },
-        emp1: {
-          fName: "Micah",
-          lName: "Parsons",
-          dept: "Sales"
-        },
-        emp1: {
-          fName: "Tyreek",
-          lName: "Hill",
-          dept: "Infrastructure"
-        },
-        emp1: {
-          fName: "Joe",
-          lName: "Burrow",
-          dept: "HR"
-        },
+        emp1: { fName: "Jalen", lName: "Hurts" },
+        emp2: { fName: "Bijan", lName: "Robinson" },
+        emp3: { fName: "Micah", lName: "Parsons" },
+        emp4: { fName: "Tyreek", lName: "Hill" },
+        emp5: { fName: "Joe", lName: "Burrow" }
 
       };
 
-      var dropdown2 = document.getElementById("emp");
+      const dropdown = document.getElementById("emp");
+  
+      Object.keys(employees).forEach(function(employeeId) {
+        const opt = document.createElement("option");
+        opt.value = employeeId;
+        opt.textContent = `${employees[employeeId].fName} ${employees[employeeId].lName}`;
+        dropdown.appendChild(opt);
+      });
+    }
 
-      
       // (D5) CALENDAR HEADER - DAY NAMES
       wrap = cal.hWrap.querySelector(".calHead");
       for (let d of cal.days) {
