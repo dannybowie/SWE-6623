@@ -172,3 +172,17 @@
     width: calc(100% / 9); /* Adjust based on number of items */
   }
 
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.logout {
+    margin-left: auto;
+}

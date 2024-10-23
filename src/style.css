@@ -1,0 +1,249 @@
+/* Color Palette */
+/* https://www.realtimecolors.com/?colors=0a0d0f-f9fbfc-6097b8-9fc5db-6bacd2&fonts=Inter-Inter */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* Color variables */
+:root{
+    --text: #0a0d0f;
+    --background: #f9fbfc;
+    --primary: #6097b8;
+    --secondary:#9fc5db;
+    --accent: #6bacd2;
+}
+
+/* These apply to all elements */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Montserrat", sans-serif;
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: url('../img/bgImg.png') no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+/* The wrapper contains the form elements*/
+.wrapper{
+    width: 420px;
+    background: transparent;
+    border: 2px solid rgba(107, 172, 210, .2);
+    backdrop-filter: blur(30px);
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 30px 40px;
+}
+
+.wrapper h1{
+    font-size: 26px;
+    text-align: center;
+}
+
+.wrapper .input-box{
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0;
+}
+
+/* Focus style for input elements */
+.wrapper .input-box input:focus {
+    border-color: var(--accent);
+}
+
+.wrapper .btn{
+    width: 100%;
+    height: 45px;
+    background: var(--background);
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    border: 2px solid rgba(107, 172, 210, .2);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.wrapper .subtext-links{
+    font-size: 14.5px;
+    text-align: center;
+    margin: 20px 0 15px;
+
+}
+
+.subtext-links p a{
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.subtext-links p a:hover{
+    text-decoration: underline;
+}
+
+#already_signedIn p{
+    margin-top: 32px;
+}
+
+#already_signedIn #not_User_Signout_Prompt{
+    margin-top: 128px;
+    font-size: .9em;
+}
+
+.input-box input{
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    border: 2px solid rgba(46, 89, 114, 0.2);
+    border-radius: 40px;
+    font-size: 16px;
+    color: var(--text);
+    padding: 20px 45px 20px 20px;
+}
+
+.input-box input::placeholder{
+    color: var(--text);
+}
+
+.input-box i{
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+}
+
+.wrapper .remember-forgot{
+    display: flex;
+    justify-content: space-between;
+    font-size: 14.5px;
+    margin: -15px 0 15px;
+}
+
+.remember-forgot label input{
+    accent-color: var(--background);
+    margin-right: 3px;
+}
+
+.remember-forgot a{
+    color: var(--text);
+     text-decoration: none;
+}
+
+.remember-forgot a:hover{
+    text-decoration: underline;
+}
+
+/* Container for both speech bubble and form wrapper */
+.container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Container for the speech bubble */
+.speech-bubble-container {
+    position: absolute;
+    bottom: 100%;  /* Position it above the wrapper */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 20px;  /* Space for the arrow */
+}
+
+/* Styles the speech bubble */
+.speech-bubble {
+    position: relative;
+    background: transparent;
+    border: 4px solid rgba(187, 24, 24, 0.2);
+    backdrop-filter: blur(30px);
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    color: var(--text);
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 14px;
+    text-align: center;
+    max-width: 80%;  /* Limit maximum width */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Allows content to wrap and expand upwards */
+.speech-bubble-content {
+    max-height: 200px;  /* Adjust as needed */
+    overflow-y: auto;  /* Adds scroll if content exceeds max-height */
+}
+
+/* Dropdown container */
+.dropdown {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0;
+}
+
+/* Dropdown select styling */
+.dropdown select {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: 2px solid rgba(46, 89, 114, 0.2);
+    border-radius: 40px;
+    font-size: 16px;
+    color: var(--text);
+    padding: 0 45px 0 20px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Styling for dropdown options */
+.dropdown select option {
+    background-color: var(--background);
+    color: var(--text);
+    padding: 10px;
+}
+
+/* Hover effect */
+.dropdown select:hover {
+    border-color: var(--accent);
+}
+
+/* Focus effect */
+.dropdown select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(107, 172, 210, 0.2);
+}
+
+/* Font Awesome icon styling */
+.dropdown i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: var(--text);
+    pointer-events: none;
+}
+
+/* Hide the custom arrow when FA icon is present */
+.dropdown i + select::after {
+    display: none;
+}
