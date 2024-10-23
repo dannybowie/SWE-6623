@@ -1,61 +1,67 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>HR Event Calendar</title>
-    <link href="CSS/styles.css" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js"></script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script defer="" src="script.js"></script>
-  </head>
-  <body>
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" type="text/css" href="src/style.css">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Human Resources Event Calendar</title>
 
-    <!-- EVENTS BAR-->
-     <div id="columnList">
-      <div class="columnItem" style="background-color: #ffcccb; border: solid 2px;">Employee Anniversary Date</div>
-      <div class="columnItem" style="background-color: #ffff00; border: solid 2px;">Employee Birthday</div>
-      <div class="columnItem" style="background-color: #0000ff; border: solid 2px;">Company Events</div>
-      <div class="columnItem" style="background-color: #ffa500; border: solid 2px;">Company Holidays</div>
-      <div class="columnItem" style="background-color: #808080; border: solid 2px;">Out of the Office</div>
-      <div class="columnItem" style="background-color: #00ff00; border: solid 2px;">Personal Time</div>
-      <div class="columnItem" style="background-color: #800080; border: solid 2px;">Training</div>
-      <div class="columnItem" style="background-color: #ff00ff; border: solid 2px;">Visitor</div>
-      <div class="columnItem" style="background-color: #ff0000; border: solid 2px;">Sick Day</div>
-     </div>
+</head>
+<body>
 
-    <!-- NAVIGATION -->
-    <div id="calPeriod">
-      <input id="calBack" type="button" value="&lt;">
-      <select id="calMonth"></select>
-      <input type="number" id="calYear">
-      <input id="calNext" type="button" value="&gt;">
+    <div class="container">
+
+        <div class="speech-bubble-container">
+            <div id="signInMessage" class="speech-bubble" style="display: none;">
+                <div class="speech-bubble-content">
+                    Test Speech Bubble
+                </div>
+            </div>
+        </div>
+
+        <div class="wrapper">
+
+            <form method="post" action="">
+                
+                <h1 id ="welcomeMessage">Welcome</h1>               
+
+                <div id = "login_form">
+                    <!-- Username Input Box -->
+                    <div class="input-box">
+                        <input type="text" id="login_email" placeholder="Email Address" required> <i class="fa-solid fa-user"></i>
+                    </div>
+
+                    <!-- Password Input Box -->
+                    <div class="input-box">
+                        <input type="password" id="login_password" placeholder="Password" required> <i class="fa-solid fa-lock"></i>
+                    </div>
+
+                    <!-- Remember Me Checkbox & Forgot Password Link -->
+                    <div class="remember-forgot">
+                        <label><input type="checkbox"> Remember Me</label>
+                        <a href="#">Forgot Password?</a>
+                    </div>
+
+                    <button class="btn" id="login_submit" type="submit">Login</button>
+
+                    <div class="subtext-links">
+                        <p>Don't have an account? <a href="register.html">Register</a></p>
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
+
     </div>
 
-    <!-- CALENDAR -->
-    <div id="calWrap"></div>
+    <script type="module" src="../src/firebaseAuth.js"></script>
+    <script type="module" src="../src/login.js"></script>
+    <script type="module" src="../src/UiManager.js"></script>
+</body>
 
-    <!-- EVENT FORM -->
-    <dialog id="calForm"><form method="dialog">
-      <div id="evtClose">X</div>
-      <h2>CALENDAR EVENT</h2>
-      <label>Date</label>
-      <input type="text" id="evtDate" readonly>
-      <label for="evtType">Event Type</label>
-        
-        <select name="evtType" id="evtType" required>
-        <option></option>
-        </select>
-        <label for="emp">Employee</label>
-        <select name="emp" id="emp" required>
-        <option></option>
-        </select>
-      </div>
-      <label>Details</label>
-      <textarea id="evtTxt" required></textarea>
-
-      <input id="evtDel" type="button" value="Delete">
-      <input id="evtSave" type="submit" value="Save">
-    </form></dialog>
-  </body>
 </html>
