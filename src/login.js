@@ -14,7 +14,7 @@ login_submit.addEventListener('click', (event) => {
         .then((userCredential) => {
             showMessage('Login Successful!', 'signInMessage');
             const user = userCredential.user;
-            // Redirect to homepage.html
+            // Redirect to calendar.html
             setTimeout(()=>{
                 window.location.href = 'calendar.html';
             }, 1500)            
