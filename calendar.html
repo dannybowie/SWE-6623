@@ -2,12 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>HR Event Calendar</title>
     <link href="CSS/styles.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js"></script>
-    
+
     <script defer="" src="script.js"></script>
   </head>
   <body>
@@ -17,10 +16,10 @@
           <span id="userName"></span>
       </div>
       <div class="logout">
-          <a href="src/logout.js" id="logoutBtn">Logout</a>
+          <a href="/" id="logoutBtn">Logout</a>
       </div>
   </header>
-```
+  
   <!-- EVENTS BAR -->
   <div id="columnList">
       <div class="columnItem" style="background-color: #ffcccb; border: solid 2px;">Employee Anniversary Date</div>
@@ -67,10 +66,9 @@
       <input id="evtDel" type="button" value="Delete">
       <input id="evtSave" type="submit" value="Save">
     </form></dialog>
-    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-storage-compat.js"></script>
-    
-    <script type="module" src="script.js"></script>
+
+    <script type="module" src="../src/login.js"></script>
+    <script type="module" src="../src/uiManager.js"></script>
     <script type="module">
       import { auth, db } from '/src/firebaseAuth.js';
       import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
@@ -90,7 +88,8 @@
               // Handle signed out state
           }
       });
+
+      
     </script>
   </body>
 </html>
-
