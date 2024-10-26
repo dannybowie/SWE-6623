@@ -1,43 +1,3 @@
-/* // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCxsEV7XU95eMCcYaWTQsr_1lpjlBOVOJ4",
-  authDomain: "ksu-swe-project.firebaseapp.com",
-  projectId: "ksu-swe-project",
-  storageBucket: "ksu-swe-project.appspot.com",
-  messagingSenderId: "990956535258",
-  appId: "1:990956535258:web:bf143b1426f42309dc94e3",
-  measurementId: "G-1250NG4CKM"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-// Get a reference to the collection
-const usersRef = collection(db, 'users');
-
-// Add a new document
-addDoc(usersRef, {
-  name: 'John Doe',
-  email: 'john.doe@example.com'
-})
-.then((docRef) => {
-  console.log('Document written with ID:', docRef.id);
-})
-.catch((error) => {
-  console.error('Error adding document:', error);
-});
-
-addDoc(); */
-
-
 var cal = {
     // (A) PROPERTIES
     // (A1) FLAGS & DATA
@@ -316,4 +276,11 @@ var cal = {
       cal.hFormWrap.close();
     }}
   };
+
+
+
+
+
+
+  
   window.onload = cal.init;
