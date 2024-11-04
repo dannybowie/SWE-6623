@@ -27,7 +27,8 @@ function saveEventToFirebase(eventData) {
         location: eventData.location,
         attendees: eventData.attendees,
         organizer: eventData.organizer,
-        status: eventData.status
+        status: eventData.status,
+        imageUrl: null
     })
     .then(() => {
         console.log("Event saved successfully");
@@ -82,6 +83,7 @@ function getEvents() {
     .then(querySnapshot => {
         querySnapshot.forEach(doc => {
             console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
+            displayEvent(doc.data()); // Call a new function to display each event
         });
     })
     .catch((error) => {
