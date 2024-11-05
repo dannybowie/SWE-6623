@@ -13,16 +13,6 @@ var cal = {
     days : ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"],
 
     // EVENTS
-    events : [
-      "Employee Anniversary Date", "Employee Birthday",
-        "Company Events",
-        "Company Holidays",
-        "Out of the Office",
-        "Personal Time",
-        "Training",
-        "Visitor",
-        "Sick Day",
-  ],
   
     // (A3) HTML ELEMENTS
     hMth : null, hYear : null, // month/year selector
@@ -131,17 +121,6 @@ var cal = {
         <div class="calRow"></div>
       </div>`;
 
-      var events = [
-        "Employee Anniversary Date", "Employee Birthday",
-          "Company Events",
-          "Company Holidays",
-          "Out of the Office",
-          "Personal Time",
-          "Training",
-          "Visitor",
-          "Sick Day",
-    ];
-      
       var dropdown = document.getElementById("evtType");
 
       events.forEach(function(option) {
@@ -262,10 +241,11 @@ var cal = {
         description: cal.hfTxt.value
       };
       
-      localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
+      // Call eventHandler.save() instead of localStorage
+      eventHandler.save(cal.sDay, eventType, cal.hfTxt.value);
+      
       cal.draw();
       cal.hFormWrap.close();
-      return false;
     },
   
     // (G) DELETE EVENT FOR SELECTED DATE
@@ -277,12 +257,38 @@ var cal = {
     }}
   };
 
-
+function fetchEventsFromFirebase() {
+  // Replace this with your actual Firebase configuration
+  var config = {
+    apiKey: "AIzaSyCxsEV7XU95eMCcYaWTQsr_1lpjlBOVOJ4",
+    authDomain: "ksu-swe-project.firebaseapp.com",
+    projectId: "ksu-swe-project",
+    storageBucket: "ksu-swe-project.appspot.com",
+    messagingSenderId: "990956535258",
+    appId: "1:990956535258:web:bf143b1426f42309dc94e3",
+    measurementId: "G-1250NG4CKM"
+  };
+  
+  firebase.initializeApp(config);
+  
+  var db = firebase.firestore();
+  
+  db.collection("events").get().then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      console.log(`${doc.id} => ${doc.data()}`);
+      // You can add the event to an array here if needed
+    });
+  }).catch((error) => {
+    console.error("Error fetching events:", error);
+  });
+}
 
 
 
 
   
-  window.onload = cal.init;
-
+  window.onload = () => {
+    cal.init();
+    fetchEventsFromFirebase();
+  };
 
