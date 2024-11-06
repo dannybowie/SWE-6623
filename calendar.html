@@ -5,13 +5,11 @@
     <title>HR Event Calendar</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="CSS/styles.css" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
-    <script defer="" src="script.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
+    
+    
   </head>
   <body>
-
     <header>
       <div class="username">
           <span id="userName"></span>
@@ -37,17 +35,14 @@
     <!-- NAVIGATION -->
     <div id="calPeriod">
       <input id="calBack" type="button" value="&lt;">
-      <select id="calMonth" title="Select month">
-        <!-- Month options -->
-      </select>
-      <input type="number" id="calYear" placeholder="Enter year" aria-label="Calendar year">
+      <select id="calMonth" title="Month"></select>
+      <input type="number" title="Year" id="calYear">
       <input id="calNext" type="button" value="&gt;">
     </div>
 
     <!-- CALENDAR -->
     <div id="calWrap"></div>
 
-    <!-- EVENT FORM -->
     <!-- EVENT FORM -->
 <dialog id="calForm">
   <form method="dialog">
@@ -99,4 +94,7 @@
       
     </script>
   </body>
+
+<script type="module" src="script.js"></script>
 </html>
+  
