@@ -234,18 +234,18 @@ var cal = {
     },
   
     // (F) SAVE EVENT
-    save : () => {
+    save: function(type, employee, description) {
       const eventType = document.getElementById("evtType").value;
       cal.data[cal.sDay] = {
-        type: eventType,
-        description: cal.hfTxt.value
+        type: type,
+        employee: employee,
+        description: description
       };
       
       // Call eventHandler.save() instead of localStorage
-      eventHandler.save(cal.sDay, eventType, cal.hfTxt.value);
+      eventHandler.save(cal.sDay, type, employee, description);
       
       cal.draw();
-      cal.hFormWrap.close();
     },
   
     // (G) DELETE EVENT FOR SELECTED DATE
@@ -283,12 +283,74 @@ function fetchEventsFromFirebase() {
   });
 }
 
+var events = [];
 
+// Function to fetch event types from Firestore
+async function fetchEventTypesFromFirestore() {
+  try {
+    const db = firebase.firestore();
+    const eventTypesRef = db.collection("eventTypes");
+    const snapshot = await eventTypesRef.get();
+    
+    events = [];
+    snapshot.docs.forEach(doc => {
+      const eventType = doc.data();
+      events.push(eventType.name);
+    });
 
+    return events;
+  } catch (error) {
+    console.error("Error fetching event types:", error);
+    return [];
+  }
+}
 
+// Function to update the UI with fetched event types
+function updateEventTypeDropdown() {
+  const evtTypeSelect = document.getElementById('evtType');
+  evtTypeSelect.innerHTML = '<option value="">Select Event Type</option>';
+
+  events.forEach(function(option) {
+    var opt = document.createElement("option");
+    opt.value = option;
+    opt.textContent = option;
+    evtTypeSelect.appendChild(opt);
+  })
+}
+
+// Initialize the calendar
+window.onload = async () => {
+  cal.init();
   
-  window.onload = () => {
-    cal.init();
-    fetchEventsFromFirebase();
-  };
+  // Fetch event types
+  await fetchEventTypesFromFirestore();
+  
+  // Populate the event type dropdown
+  updateEventTypeDropdown();
+  
+  // Fetch events for the current month
+ // fetchEventsForCurrentMonth();
+};
 
+// Function to handle form submission
+function handleSubmitForm(e) {
+  e.preventDefault();
+  
+  const evtType = document.getElementById('evtType').value;
+  const emp = document.getElementById('emp').value;
+  const evtTxt = document.getElementById('evtTxt').value;
+
+  if (evtType === '' || emp === '' || evtTxt === '') {
+    alert('Please fill all fields.');
+    return;
+  }
+
+  // Save the event to Firebase
+  cal.save(evtType, emp, evtTxt);
+
+  // Close the dialog
+  cal.hFormWrap.close();
+}
+
+// Add event listener to the submit button
+document.getElementById('evtSave').addEventListener('click', handleSubmitForm);
