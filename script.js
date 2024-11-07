@@ -165,6 +165,7 @@ class EventHandler {
     const description = document.getElementById("evtTxt").value;
     const userId = document.getElementById("emp").value;
     const evtDateInput = document.getElementById("evtDate");
+      
   
     console.log('Form dat:', { eventType, description, userId, evtDate: evtDateInput.value });
   
@@ -178,7 +179,8 @@ class EventHandler {
         description: description,
         userId: userId,
         eventDate: evtDateInput.value,
-        timestamp: new Date()
+        timestamp: new Date(),
+        evtId: userId+timestamp
       };
   
       // Add the new event to the events collection
