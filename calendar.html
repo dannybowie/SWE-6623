@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="CSS/styles.css" rel="stylesheet">
     <script type="module" src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
-    
-    
+
+
   </head>
   <body>
     <header>
@@ -18,7 +18,7 @@
           <a href="/" id="logoutBtn">Logout</a>
       </div>
   </header>
-  
+
   <!-- EVENTS BAR -->
   <div id="columnList">
       <div class="columnItem" style="background-color: #ffcccb; border: solid 2px;">Employee Anniversary Date</div>
@@ -50,27 +50,29 @@
     <h2>CALENDAR EVENT</h2>
     <label>Date</label>
     <input type="text" id="evtDate" readonly>
-    
+
     <label for="evtType">Event Type</label>
     <select name="evtType" id="evtType" required>
       <!-- Options will be populated dynamically -->
     </select>
-    
+
     <label for="emp">Employee</label>
     <select name="emp" id="emp" required>
       <option></option>
     </select>
-    
+
     <label>Details</label>
     <textarea id="evtTxt" required></textarea>
-    
+
     <input id="evtDel" type="button" value="Delete">
-    <input id="evtSave" type="submit" value="Save">
+
+    <button id="evtSave" type="submit">Save</button>
   </form>
 </dialog>
 
-    <script type="module" src="../src/login.js"></script>
+    <!-- <script type="module" src="../src/login.js"></script> -->
     <script type="module" src="../src/uiManager.js"></script>
+    <script type="module" src="../script.js"></script>
     <script type="module">
       import { auth, db } from '/src/firebaseAuth.js';
       import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
@@ -80,7 +82,7 @@
               // User is signed in
               const docRef = doc(db, "users", user.uid);
               const docSnap = await getDoc(docRef);
-              
+
               if (docSnap.exists()) {
                   const userData = docSnap.data();
                   document.getElementById('userName').textContent = `Welcome, ${userData.firstName}!`;
@@ -91,10 +93,19 @@
           }
       });
 
-      
+
     </script>
+    <script>
+      document.getElementById('evtSave').addEventListener('click', async (e) => {
+        e.preventDefault();
+        console.log('Save button clicked');
+        await save();
+      });
+      </script>
+
+
   </body>
 
 <script type="module" src="script.js"></script>
 </html>
-  
+
