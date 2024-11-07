@@ -1,7 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-import { getFirestore, doc, getDocs, getDoc, collection, arrayUnion, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getFirestore, doc, getDocs, collection, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCxsEV7XU95eMCcYaWTQsr_1lpjlBOVOJ4",
   authDomain: "ksu-swe-project.firebaseapp.com",
@@ -15,26 +16,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-class EventHandler {
-  static generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
-
+class Calendar {
   constructor() {
     this.eventTypes = [];
     this.dropdown = document.getElementById("evtType");
     this.employeeSelect = document.getElementById("emp");
-    this.users = [];
-    
     this.fetchEventTypesFromFirestore().then(() => {
       this.createEventOptions();
-      this.createEmployeeOptions();
-    });
-
-    this.fetchUsersFromFirestore().then(() => {
       this.createEmployeeOptions();
     });
   }
@@ -50,60 +38,13 @@ class EventHandler {
     }
   }
 
-  async fetchUsersFromFirestore() {
-    try {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      console.log("Query snapshot size:", querySnapshot.size);
-      this.users = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      console.log("Fetched users:", this.users);
-
-      // Populate employee select dropdown
-      const employeeSelect = document.getElementById("emp");
-      employeeSelect.innerHTML = ''; // Clear existing options
-      this.users.forEach((employee) => {
-        const opt = document.createElement("option");
-        opt.value = employee.id; // Use the actual document ID as value
-        opt.textContent = `${employee.firstName} ${employee.lastName}`;
-        employeeSelect.appendChild(opt);
-      });
-      
-      // Log the IDs of fetched users
-      console.log("User IDs:", this.users.map(user => user.id));
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  }
-
-  async fetchEventsFromFirestore() {
-    try {
-      const querySnapshot = await getDocs(collection(db, "events"));
-      console.log("Query snapshot size:", querySnapshot.size);
-      this.eventsByDate = {};
-      querySnapshot.forEach((doc) => {
-        const { eventDate } = doc.data();
-        const dateObj = new Date(eventDate);
-        const formattedDate = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getDate().toString().padStart(2, '0')}`;
-        
-        if (!this.eventsByDate[formattedDate]) {
-          this.eventsByDate[formattedDate] = [];
-        }
-        this.eventsByDate[formattedDate].push(doc.data());
-      });
-      console.log("Fetched events:", this.eventsByDate);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    }
-  }
-
   createEventOptions() {
     if (!this.dropdown) {
       console.error("Element with id 'evtType' not found");
       return;
     }
   }
+
   createEventOptions() {
     this.dropdown.innerHTML = ''; // Clear existing options
     this.eventTypes.forEach((eventType) => {
@@ -120,130 +61,27 @@ class EventHandler {
       return;
     }
 
+    // Example employee options creation
+    const employees = [
+      { id: "emp1", name: "Jalen Hurts" },
+      { id: "emp2", name: "Bijan Robinson" },
+      { id: "emp3", name: "Micah Parsons" },
+      { id: "emp4", name: "Tyreek Hill" },
+      { id: "emp5", name: "Joe Burrow" }
+    ];
+
     this.employeeSelect.innerHTML = ''; // Clear existing options
-    this.users.forEach((employee) => {
+    employees.forEach((employee) => {
       const opt = document.createElement("option");
       opt.value = employee.id;
-      opt.textContent = employee.firstName + " " + employee.lastName;
+      opt.textContent = employee.name;
       this.employeeSelect.appendChild(opt);
     });
   }
-  
-  // Helper function to reset the form
-  resetForm() {
-    document.getElementById("evtType").value = "";
-    document.getElementById("evtTxt").value = "";
-    document.getElementById("evtDate").value = "";
-  }
 
-  closeForm() {
-    // Get the form wrapper element
-    const formWrapper = document.getElementById('calForm');
-    
-    // Check if the form wrapper exists
-    if (formWrapper) {
-        // Close the form
-        formWrapper.style.display = 'none';
-        
-        // Reset the form fields
-        this.resetForm();
-    } else {
-        console.error('Form wrapper not found');
-    }
-  }
-
-  // Helper function to get the selected user ID
-  getSelectedUserId() {
-    return document.getElementById("emp").value;
-  }
-
-
-  async save() {
-    console.log('Save function called');
-  
-    const eventType = document.getElementById("evtType").value;
-    const description = document.getElementById("evtTxt").value;
-    const userId = document.getElementById("emp").value;
-    const evtDateInput = document.getElementById("evtDate");
-  
-    console.log('Form dat:', { eventType, description, userId, evtDate: evtDateInput.value });
-  
-    try {
-      // Create a new event object
-      const newEvent = {
-        type: eventType,
-        description: description,
-        userId: userId,
-        eventDate: evtDateInput.value,
-        timestamp: new Date()
-      };
-  
-      // Add the new event to the events collection
-      await setDoc(doc(db, "events", EventHandler.generateUUID()), newEvent);
-  
-      console.log("Event saved successfully!");
-      
-      // Refresh events after saving
-      await this.fetchEventsFromFirestore();
-
-      // Close the form
-      this.closeForm();
-    } catch (error) {
-      console.error("Error saving event:", error);
-      alert(`An error occurred while saving the event: ${error.message}`);
-    }
-  }
-  
-  async del() {
-    if (confirm("Delete event?")) {
-      const selectedDay = document.getElementById("evtDate").value;
-      
-      try {
-        await deleteDoc(doc(db, "events", selectedDay));
-        console.log("Event deleted successfully from Firestore");
-        
-        // Update the calendar display
-        this.updateCalendarDisplay();
-        
-        // Close the form
-        this.closeForm();
-      } catch (error) {
-        console.error("Error deleting event:", error);
-        alert(`Failed to delete the event: ${error.message}`);
-      }
-    }
-  }
-
-  // New method to update the calendar display
-  updateCalendarDisplay() {
-    this.fetchEventsFromFirestore().then(() => {
-      this.draw();
-    });
-  }
-  
-
-  
   init() {
-    cal.init();
+    // Initialize calendar logic here
     console.log("Calendar initialized");
-
-    this.handleFormSubmission();
-  }
-
-  handleFormSubmission() {
-    const form = document.getElementById("calForm");
-    if (form) {
-      console.log('Found form element');
-      
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        console.log('Form submitted');
-        
-        await this.save();
-      });
-    } else {
-      console.error('Form element not found');
-    }
   }
 }
 
@@ -484,27 +322,27 @@ var cal = {
     cal.hFormWrap.show();
   },
 
-  // // (F) SAVE EVENT
-  // save : () => {
-  //   const eventType = document.getElementById("evtType").value;
-  //   cal.data[cal.sDay] = {
-  //     type: eventType,
-  //     description: cal.hfTxt.value
-  //   };
+  // (F) SAVE EVENT
+  save : () => {
+    const eventType = document.getElementById("evtType").value;
+    cal.data[cal.sDay] = {
+      type: eventType,
+      description: cal.hfTxt.value
+    };
     
-  //   localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
-  //   cal.draw();
-  //   cal.hFormWrap.close();
-  //   return false;
-  // },
+    localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
+    cal.draw();
+    cal.hFormWrap.close();
+    return false;
+  },
 
   // (G) DELETE EVENT FOR SELECTED DATE
-  // del : () => { if (confirm("Delete event?")) {
-  //   delete cal.data[cal.sDay];
-  //   localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
-  //   cal.draw();
-  //   cal.hFormWrap.close();
-  // }}
+  del : () => { if (confirm("Delete event?")) {
+    delete cal.data[cal.sDay];
+    localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
+    cal.draw();
+    cal.hFormWrap.close();
+  }}
 };
 
 
@@ -514,8 +352,7 @@ var cal = {
 
 
 // Initialize calendar
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM fully loaded');
-  const handler = new EventHandler();
-  handler.init();
-})
+window.onload = () => {
+  const cal = new Calendar();
+  cal.init();
+};
