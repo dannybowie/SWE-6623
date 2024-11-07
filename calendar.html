@@ -71,11 +71,10 @@
 </dialog>
 
     <!-- <script type="module" src="../src/login.js"></script> -->
-    <script type="module" src="../src/uiManager.js"></script>
-    <script type="module" src="../script.js"></script>
-    <script type="module" src="script.js"></script>
+    <script type="module" src="/SWE-6623/src/uiManager.js"></script>
+    <script type="module" src="/SWE-6623/script.js"></script>
     <script type="module">
-      import { auth, db } from '/src/firebaseAuth.js';
+      import { auth, db } from '/SWE-6623/src/firebaseAuth.js';
       import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
       auth.onAuthStateChanged(async (user) => {

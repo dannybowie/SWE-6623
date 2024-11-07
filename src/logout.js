@@ -1,5 +1,5 @@
-import { auth } from '/src/firebaseAuth.js';
-import { showMessage } from '/src/uiManager.js';
+import { auth } from '/SWE-6623/src/firebaseAuth.js';
+import { showMessage } from '/SWE-6623/src/uiManager.js';
 
 const logoutBtn = document.getElementById('logoutBtn');
 

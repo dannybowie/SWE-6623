@@ -1,5 +1,5 @@
-import { auth } from '/src/firebaseAuth.js';
-import { showMessage } from '/src/uiManager.js';
+import { auth } from '/SWE-6623/src/firebaseAuth.js';
+import { showMessage } from '/SWE-6623/src/uiManager.js';
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 // Wait for DOMContentLoaded before executing our code
