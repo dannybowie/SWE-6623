@@ -1,6 +1,6 @@
 // The UI manager is intended to manage the functions of UI pop ups, styles based on user-specific data, etc.
 
-import { auth, db } from '/src/firebaseAuth.js';
+import { auth, db } from '../src/firebaseAuth.js';
 import { doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 
