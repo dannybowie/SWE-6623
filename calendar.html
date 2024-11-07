@@ -73,6 +73,7 @@
     <!-- <script type="module" src="../src/login.js"></script> -->
     <script type="module" src="../src/uiManager.js"></script>
     <script type="module" src="../script.js"></script>
+    <script type="module" src="script.js"></script>
     <script type="module">
       import { auth, db } from '/src/firebaseAuth.js';
       import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
@@ -96,16 +97,17 @@
 
     </script>
     <script>
+      $(document).ready(function() {
       document.getElementById('evtSave').addEventListener('click', async (e) => {
         e.preventDefault();
         console.log('Save button clicked');
         await save();
-      });
+      })});
       </script>
 
 
   </body>
 
-<script type="module" src="script.js"></script>
+
 </html>
 
