@@ -169,9 +169,12 @@ class EventHandler {
     console.log('Form dat:', { eventType, description, userId, evtDate: evtDateInput.value });
   
     try {
+      // Generate a unique ID for the event
+      const eventId = EventHandler.generateUUID();
+
       // Create a new event object
       const newEvent = {
-        type: eventType,
+      id: eventId,
         description: description,
         userId: userId,
         eventDate: evtDateInput.value,
@@ -179,7 +182,7 @@ class EventHandler {
       };
   
       // Add the new event to the events collection
-      await setDoc(doc(db, "events", EventHandler.generateUUID()), newEvent);
+      await setDoc(doc(db, "events", eventId), newEvent);
   
       console.log("Event saved successfully!");
       
