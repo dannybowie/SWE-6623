@@ -1,6 +1,6 @@
 
-import { auth, db } from '/SWE-6623/src/firebaseAuth.js';
-import { showMessage } from '/SWE-6623/src/uiManager.js';
+import { auth, db } from '../src/firebaseAuth.js';
+import { showMessage } from '../src/uiManager.js';
 
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 

@@ -83,14 +83,19 @@ class EventHandler {
       console.log("Query snapshot size:", querySnapshot.size);
       this.eventsByDate = {};
       querySnapshot.forEach((doc) => {
-        const { eventDate } = doc.data();
+        const { eventDate, firstName, lastName } = doc.data();
         const dateObj = new Date(eventDate);
         const formattedDate = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getDate().toString().padStart(2, '0')}`;
         
         if (!this.eventsByDate[formattedDate]) {
           this.eventsByDate[formattedDate] = [];
         }
-        this.eventsByDate[formattedDate].push(doc.data());
+        this.eventsByDate[formattedDate].push({ 
+            type: doc.data().type, 
+            description: doc.data().description,
+            firstName: firstName,
+            lastName: lastName
+        });
       });
       console.log("Fetched events:", this.eventsByDate);
     } catch (error) {
@@ -179,8 +184,9 @@ class EventHandler {
         description: description,
         userId: userId,
         eventDate: evtDateInput.value,
+        firstName: document.getElementById("reg_nameFirst").value,
+        lastName: document.getElementById("reg_nameLast").value,
         timestamp: new Date(),
-        evtId: userId+timestamp
       };
   
       // Add the new event to the events collection
@@ -386,28 +392,6 @@ var cal = {
       <div class="calRow"></div>
     </div>`;
 
-    
-  //   createEmployeeOptions();
-  //   function createEmployeeOptions() {
-  //   const employees = {
-  //     emp1: { fName: "Jalen", lName: "Hurts" },
-  //     emp2: { fName: "Bijan", lName: "Robinson" },
-  //     emp3: { fName: "Micah", lName: "Parsons" },
-  //     emp4: { fName: "Tyreek", lName: "Hill" },
-  //     emp5: { fName: "Joe", lName: "Burrow" }
-
-  //   };
-
-  //   const dropdown = document.getElementById("emp");
-
-  //   Object.keys(employees).forEach(function(employeeId) {
-  //     const opt = document.createElement("option");
-  //     opt.value = employeeId;
-  //     opt.textContent = `${employees[employeeId].fName} ${employees[employeeId].lName}`;
-  //     dropdown.appendChild(opt);
-  //   });
-  // }
-
     // (D5) CALENDAR HEADER - DAY NAMES
     let wrap = cal.hWrap.querySelector(".calHead");
     for (let d of cal.days) {
@@ -433,9 +417,19 @@ var cal = {
       
       if (cal.data[squares[i]]) {
           const event = cal.data[squares[i]];
-          cell.style.backgroundColor = getEventColor(event.type);
+
           
           cell.innerHTML += `<div class='evt'>${event.type}: ${event.description}</div>`;
+
+          // Show employee name
+          cell.innerHTML += `<span class="employee-name">${event.firstName} ${event.lastName}</span>`;
+
+          // Add event color
+          
+          cell.innerHTML += `<div class='evt'>${event.type}: ${event.description}</div>`;
+
+          // Add click handler for each event
+          cell.onclick = () => { cal.show(cell); };
       }
       
       cell.onclick = () => { cal.show(cell); };
