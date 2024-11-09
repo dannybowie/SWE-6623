@@ -3,10 +3,6 @@ import { auth, db } from '../src/firebaseAuth.js';
 import { showMessage } from '../src/uiManager.js';
 
 import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-
-// Import setDoc and doc functions from Firebase Firestore
-// setDoc: Used to write user data to Firestore after successful account creation
-// doc: Used to create a reference to the user's document in Firestore
 import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const register_submit = document.getElementById('reg_submit');
@@ -21,25 +17,30 @@ register_submit.addEventListener('click', (event) => {
     const nameLast = document.getElementById('reg_nameLast').value;
     const department = document.getElementById('reg_department').value;
 
-    createUserWithEmailAndPassword(auth, email, password) // Attempt to create a new user account with the provided email and password
-        .then((userCredential) => {  // If successful, this callback receives a UserCredential object
-            const user = userCredential.user; // The 'user' object contains information about the newly created user
+    createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            const user = userCredential.user;
+            
+            // Generate a unique ID for the user
+            const userId = user.uid; // Use Firebase's built-in UID instead of generating a new one
             
             // Create an object to store additional user information
             // This data will be saved to Firestore for a more complete user profile
             const userData = {
+                id: userId,
                 email: email,
                 firstName: nameFirst,
                 lastName: nameLast,
                 department: department
             };
+
+            showMessage('User account created successfully. Saving details...', 'signUpMessage');
             
-            showMessage('User account created successfully. Redirecting...', 'signUpMessage');
-            const docRef = doc(db, "users", user.uid);
+            const docRef = doc(db, "users", userId);
             setDoc(docRef, userData)
                 .then(() => {
                     setTimeout(() => {
-                        window.location.href = 'index.html';    
+                        window.location.href = 'index.html';
                     }, 2000);
                 })
                 .catch((error) => {

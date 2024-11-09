@@ -37,14 +37,16 @@ class EventHandler {
     this.fetchUsersFromFirestore().then(() => {
       this.createEmployeeOptions();
     });
+
+    this.fetchEventsFromFirestore();
   }
 
   async fetchEventTypesFromFirestore() {
     try {
       const querySnapshot = await getDocs(collection(db, "eventType"));
-      console.log("Query snapshot size:", querySnapshot.size);
+      //console.log("Query snapshot size:", querySnapshot.size);
       this.eventTypes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log("Fetched event types:", this.eventTypes);
+      //console.log("Fetched event types:", this.eventTypes);
     } catch (error) {
       console.error("Error fetching event types:", error);
     }
@@ -53,12 +55,12 @@ class EventHandler {
   async fetchUsersFromFirestore() {
     try {
       const querySnapshot = await getDocs(collection(db, "users"));
-      console.log("Query snapshot size:", querySnapshot.size);
+      //console.log("Query snapshot size:", querySnapshot.size);
       this.users = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      console.log("Fetched users:", this.users);
+      //console.log("Fetched users:", this.users);
 
       // Populate employee select dropdown
       const employeeSelect = document.getElementById("emp");
@@ -71,7 +73,7 @@ class EventHandler {
       });
       
       // Log the IDs of fetched users
-      console.log("User IDs:", this.users.map(user => user.id));
+      //console.log("User IDs:", this.users.map(user => user.id));
     } catch (error) {
       console.error("Error fetching users:", error);
     }
@@ -80,23 +82,32 @@ class EventHandler {
   async fetchEventsFromFirestore() {
     try {
       const querySnapshot = await getDocs(collection(db, "events"));
-      console.log("Query snapshot size:", querySnapshot.size);
+      //console.log("Query snapshot size:", querySnapshot.size);
+        
       this.eventsByDate = {};
       querySnapshot.forEach((doc) => {
-        const { eventDate, firstName, lastName } = doc.data();
+        const { id, userId, eventDate, eventType, description } = doc.data();
+        
         const dateObj = new Date(eventDate);
+        //console.log("date check " + dateObj);
+        
         const formattedDate = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getDate().toString().padStart(2, '0')}`;
+        
         
         if (!this.eventsByDate[formattedDate]) {
           this.eventsByDate[formattedDate] = [];
         }
+        
         this.eventsByDate[formattedDate].push({ 
-            type: doc.data().type, 
-            description: doc.data().description,
-            firstName: firstName,
-            lastName: lastName
+            id: doc.id, // eventId as the unique identifier
+            userId: userId,
+            eventDate: formattedDate,
+            eventType: eventType,
+            description: description
+            
         });
       });
+        
       console.log("Fetched events:", this.eventsByDate);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -181,11 +192,10 @@ class EventHandler {
       // Create a new event object
       const newEvent = {
       id: eventId,
+        eventType: eventType,
         description: description,
         userId: userId,
         eventDate: evtDateInput.value,
-        firstName: document.getElementById("reg_nameFirst").value,
-        lastName: document.getElementById("reg_nameLast").value,
         timestamp: new Date(),
       };
   
@@ -236,7 +246,7 @@ class EventHandler {
   
   init() {
     cal.init();
-    console.log("Calendar initialized");
+    //console.log("Calendar initialized");
 
     this.handleFormSubmission();
   }
@@ -244,11 +254,11 @@ class EventHandler {
   handleFormSubmission() {
     const form = document.getElementById("calForm");
     if (form) {
-      console.log('Found form element');
+      //console.log('Found form element');
       
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        console.log('Form submitted');
+        //console.log('Form submitted');
         
         await this.save();
       });
@@ -514,7 +524,7 @@ var cal = {
 
 // Initialize calendar
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOM fully loaded');
+  //console.log('DOM fully loaded');
   const handler = new EventHandler();
   handler.init();
 })
