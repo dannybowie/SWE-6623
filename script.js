@@ -82,33 +82,32 @@ class EventHandler {
   async fetchEventsFromFirestore() {
     try {
       const querySnapshot = await getDocs(collection(db, "events"));
-      //console.log("Query snapshot size:", querySnapshot.size);
-        
-      this.eventsByDate = {};
+      cal.data = {};
+
+
       querySnapshot.forEach((doc) => {
         const { id, userId, eventDate, eventType, description } = doc.data();
         
-        const dateObj = new Date(eventDate);
-        //console.log("date check " + dateObj);
-        
-        const formattedDate = `${dateObj.getFullYear()}-${(dateObj.getMonth() + 1).toString().padStart(2, '0')}-${dateObj.getDate().toString().padStart(2, '0')}`;
-        
-        
-        if (!this.eventsByDate[formattedDate]) {
-          this.eventsByDate[formattedDate] = [];
+        // Parse the eventDate string
+        const [day, month, year] = eventDate.split(' ');
+        const parsedDate = `${parseInt(day)} ${month} ${year}`;
+
+        if (!cal.data[parsedDate]) {
+          cal.data[parsedDate] = {};
         }
-        
-        this.eventsByDate[formattedDate].push({ 
-            id: doc.id, // eventId as the unique identifier
-            userId: userId,
-            eventDate: formattedDate,
-            eventType: eventType,
-            description: description
-            
+
+        cal.data[parsedDate][id] = {
+          type: eventType,
+          description: description,
+          firstName: '', // You might want to fetch this from the users collection
+          lastName: '' // You might want to fetch this from the users collection
+        };
         });
-      });
-        
-      console.log("Fetched events:", this.eventsByDate);
+      
+      // Store the data in localStorage
+      localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
+
+      console.log("Events fetched and stored:", cal.data);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
@@ -167,32 +166,33 @@ class EventHandler {
     const description = document.getElementById("evtTxt").value;
     const userId = document.getElementById("emp").value;
     const evtDateInput = document.getElementById("evtDate");
-      
-  
-    console.log('Form dat:', { eventType, description, userId, evtDate: evtDateInput.value });
+    const [day, month, year] = evtDateInput.value.split('-');
+    const formattedDate = `${evtDateInput.value.substring(0, 4)}${evtDateInput.value.substring(4, 6)}${evtDateInput.value.substring(6, 8)}`;
   
     try {
-      // Generate a unique ID for the event
-      const eventId = EventHandler.generateUUID();
+      
 
       // Create a new event object
       const newEvent = {
-      id: eventId,
+      id: EventHandler.generateUUID(),
         eventType: eventType,
         description: description,
         userId: userId,
-        eventDate: evtDateInput.value,
-        timestamp: new Date(),
+        eventDate: formattedDate,
+        timestamp: new Date()
       };
   
       // Add the new event to the events collection
-      await setDoc(doc(db, "events", eventId), newEvent);
+      await setDoc(doc(db, "events", formattedDate), newEvent);
   
       console.log("Event saved successfully!");
       
       // Refresh events after saving
       await this.fetchEventsFromFirestore();
       await cal.hFormWrap.close();
+
+      // Update the calendar display
+      this.updateCalendarDisplay();
     } catch (error) {
       console.error("Error saving event:", error);
       alert(`An error occurred while saving the event: ${error.message}`);
@@ -264,19 +264,6 @@ var cal = {
     "July", "August", "September", "October", "November", "December"
   ],
   days : ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"],
-
-//   // EVENTS
-//   events : [
-//     "Employee Anniversary Date", "Employee Birthday",
-//       "Company Events",
-//       "Company Holidays",
-//       "Out of the Office",
-//       "Personal Time",
-//       "Training",
-//       "Visitor",
-//       "Sick Day",
-// ],
-
 
   // (A3) HTML ELEMENTS
   hMth : null, hYear : null, // month/year selector
@@ -398,70 +385,57 @@ var cal = {
     wrap = cal.hWrap.querySelector(".calBody");
     let row = cal.hWrap.querySelector(".calRow");
 
-    for (let i=0; i<squares.length; i++) {
-    // (D6-1) GENERATE CELL
-    let cell = document.createElement("div");
-    cell.className = "calCell";
-  
-    if (nowDay==squares[i]) { cell.classList.add("calToday"); }
-    if (squares[i]=="b") { cell.classList.add("calBlank"); }
-    else {
-      cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
-      
-      if (cal.data[squares[i]]) {
-          const event = cal.data[squares[i]];
-
-          
-          cell.innerHTML += `<div class='evt'>${event.type}: ${event.description}</div>`;
-
-          // Show employee name
-          cell.innerHTML += `<span class="employee-name">${event.firstName} ${event.lastName}</span>`;
-
-          // Add event color
-          
-          cell.innerHTML += `<div class='evt'>${event.type}: ${event.description}</div>`;
-
-          // Add click handler for each event
-          cell.onclick = () => { cal.show(cell); };
-      }
-      
-      cell.onclick = () => { cal.show(cell); };
-  }
-
-  function getEventColor(eventType) {
-    switch (eventType) {
-        case "Employee Anniversary Date":
-            return "#ffcccb"; // Pastel pink
-        case "Employee Birthday":
-            return "#ffff00"; // Yellow
-        case "Company Events":
-            return "#0000ff"; // Blue
-        case "Company Holidays":
-            return "#ffa500"; // Orange
-        case "Out of the Office":
-            return "#808080"; // Gray
-        case "Personal Time":
-            return "#00ff00"; // Green
-        case "Training":
-            return "#800080"; // Purple
-        case "Visitor":
-            return "#ff00ff"; // Magenta
-        case "Sick Day":
-            return "#ff0000"; // Red
-        default:
-            return "#ffffff"; // White
+    // Function to format date as dd month yyyy
+    function formatDate(day, month, year) {
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+                        "July", "August", "September", "October", "November", "December"];
+      return `${day} ${monthNames[month - 1]} ${year}`;
     }
-}
-  
-  row.appendChild(cell);
 
-      // (D6-2) NEXT ROW
-      if (i!=(squares.length-1) && i!=0 && (i+1)%7==0) {
+    for (let i = 0; i < squares.length; i++) {
+      // Generate cell
+      let cell = document.createElement("div");
+      cell.className = "calCell";
+
+      // Check if today
+      if (nowDay === squares[i] && cal.sMth === nowMth && cal.sYear === nowYear) {
+        cell.classList.add("calToday");
+        }
+
+      // Blank squares
+      if (squares[i] === "b") {
+        cell.classList.add("calBlank");
+        }
+
+      // Get the formatted date for this cell
+      const formattedDate = formatDate(squares[i], cal.sMth + 1, cal.sYear);
+
+      if (cal.data[formattedDate] && Object.keys(cal.data[formattedDate]).length > 0) {
+        const event = cal.data[formattedDate][Object.keys(cal.data[formattedDate])[0]];
+        
+
+        // Display event details
+        cell.innerHTML = `<div class='evt'>${event.type}: ${event.description}</div>`;
+        cell.innerHTML += `<span class="employee-name">${event.firstName} ${event.lastName}</span>`;
+
+        // Add click handler for each event
+        cell.onclick = () => { cal.show(cell); };
+      } else {
+        // No events, just show the day number
+        cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
+        cell.onclick = () => { cal.show(cell); };
+        }
+
+      // Append cell to row
+      row.appendChild(cell);
+
+      // Next row
+      if ((i + 1) % 7 === 0 && i !== 0) {
         row = document.createElement("div");
         row.className = "calRow";
         wrap.appendChild(row);
-      }
-    }
+        }
+  }
   },
 
   // (E) SHOW EDIT EVENT DOCKET FOR SELECTED DAY
@@ -476,27 +450,7 @@ var cal = {
     cal.hFormWrap.show();
   },
 
-  // // (F) SAVE EVENT
-  // save : () => {
-  //   const eventType = document.getElementById("evtType").value;
-  //   cal.data[cal.sDay] = {
-  //     type: eventType,
-  //     description: cal.hfTxt.value
-  //   };
-    
-  //   localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
-  //   cal.draw();
-  //   cal.hFormWrap.close();
-  //   return false;
-  // },
-
   // (G) DELETE EVENT FOR SELECTED DATE
-  // del : () => { if (confirm("Delete event?")) {
-  //   delete cal.data[cal.sDay];
-  //   localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
-  //   cal.draw();
-  //   cal.hFormWrap.close();
-  // }}
 };
 
 

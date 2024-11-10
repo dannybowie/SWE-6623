@@ -186,3 +186,8 @@
 .logout {
     margin-left: auto;
 }
+
+.event-name {
+    font-weight: bold;
+    margin-right: 5px;
+}
