@@ -152,21 +152,7 @@ class EventHandler {
     document.getElementById("evtDate").value = "";
   }
 
-  closeForm() {
-    // Get the form wrapper element
-    const formWrapper = document.getElementById('calForm');
-    
-    // Check if the form wrapper exists
-    if (formWrapper) {
-        // Close the form
-        formWrapper.style.display = 'none';
-        
-        // Reset the form fields
-        this.resetForm();
-    } else {
-        console.error('Form wrapper not found');
-    }
-  }
+
 
   // Helper function to get the selected user ID
   getSelectedUserId() {
@@ -206,9 +192,7 @@ class EventHandler {
       
       // Refresh events after saving
       await this.fetchEventsFromFirestore();
-
-      // Close the form
-      this.closeForm();
+      await cal.hFormWrap.close();
     } catch (error) {
       console.error("Error saving event:", error);
       alert(`An error occurred while saving the event: ${error.message}`);
@@ -226,8 +210,7 @@ class EventHandler {
         // Update the calendar display
         this.updateCalendarDisplay();
         
-        // Close the form
-        this.closeForm();
+      
       } catch (error) {
         console.error("Error deleting event:", error);
         alert(`Failed to delete the event: ${error.message}`);
