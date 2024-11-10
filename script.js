@@ -166,9 +166,13 @@ class EventHandler {
     const description = document.getElementById("evtTxt").value;
     const userId = document.getElementById("emp").value;
     const evtDateInput = document.getElementById("evtDate");
+
+    const rawDate = evtDateInput.value;
     const [day, month, year] = evtDateInput.value.split('-');
-    const formattedDate = `${evtDateInput.value.substring(0, 4)}${evtDateInput.value.substring(4, 6)}${evtDateInput.value.substring(6, 8)}`;
-  
+
+    const formattedDate = `${day} ${this.getFormattedMonthName(month)} ${year}`;
+
+    console.log("FormattedDate " + formattedDate);
     try {
       
 
@@ -198,6 +202,14 @@ class EventHandler {
       alert(`An error occurred while saving the event: ${error.message}`);
     }
   }
+
+  getFormattedMonthName(monthNumber) {
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return monthNames[monthNumber - 1];
+  }
   
   async del() {
     if (confirm("Delete event?")) {
@@ -221,7 +233,7 @@ class EventHandler {
   // New method to update the calendar display
   updateCalendarDisplay() {
     this.fetchEventsFromFirestore().then(() => {
-      this.draw();
+      cal.draw();
     });
   }
   
