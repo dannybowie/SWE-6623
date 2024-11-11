@@ -428,7 +428,7 @@ var cal = {
 
         // Display event details
         cell.innerHTML = `<div class='evt'>${event.type}: ${event.description}</div>`;
-        cell.innerHTML += `<span class="employee-name">${event.firstName} ${event.lastName}</span>`;
+        cell.innerHTML += `<span class="employee-name">${event.employee}</span>`;
 
         // Add click handler for each event
         cell.onclick = () => { cal.show(cell); };
