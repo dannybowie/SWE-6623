@@ -67,7 +67,7 @@ class EventHandler {
       employeeSelect.innerHTML = ''; // Clear existing options
       this.users.forEach((employee) => {
         const opt = document.createElement("option");
-        opt.value = employee.id; // Use the actual document ID as value
+        opt.value = `${employee.firstName} ${employee.lastName}`; // Use the actual document ID as value
         opt.textContent = `${employee.firstName} ${employee.lastName}`;
         employeeSelect.appendChild(opt);
       });
@@ -123,7 +123,7 @@ class EventHandler {
     this.dropdown.innerHTML = ''; // Clear existing options
     this.eventTypes.forEach((eventType) => {
       const opt = document.createElement("option");
-      opt.value = eventType.id;
+      opt.value = eventType.name;
       opt.textContent = eventType.name;
       this.dropdown.appendChild(opt);
     });
@@ -138,7 +138,7 @@ class EventHandler {
     this.employeeSelect.innerHTML = ''; // Clear existing options
     this.users.forEach((employee) => {
       const opt = document.createElement("option");
-      opt.value = employee.id;
+      opt.value = employee.firstName + " " + employee.lastName;
       opt.textContent = employee.firstName + " " + employee.lastName;
       this.employeeSelect.appendChild(opt);
     });
@@ -163,6 +163,7 @@ class EventHandler {
     console.log('Save function called');
   
     const eventType = document.getElementById("evtType").value;
+
     const description = document.getElementById("evtTxt").value;
     const userId = document.getElementById("emp").value;
     const evtDateInput = document.getElementById("evtDate");
@@ -421,17 +422,21 @@ var cal = {
 
       // Get the formatted date for this cell
       const formattedDate = formatDate(squares[i], cal.sMth + 1, cal.sYear);
+      cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
 
+      
       if (cal.data[formattedDate] && Object.keys(cal.data[formattedDate]).length > 0) {
         const event = cal.data[formattedDate][Object.keys(cal.data[formattedDate])[0]];
         
 
         // Display event details
-        cell.innerHTML = `<div class='evt'>${event.type}: ${event.description}</div>`;
-        cell.innerHTML += `<span class="employee-name">${event.employee}</span>`;
+       cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
+        cell.innerHTML = `<div class='evt'>${event.type}: ${event.employee}</div>`;
 
         // Add click handler for each event
-        cell.onclick = () => { cal.show(cell); };
+        cell.onclick = () => {
+          cal.show(cell);
+        };
       } else {
         // No events, just show the day number
         cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
@@ -461,6 +466,7 @@ var cal = {
     } else { cal.hfDel.classList.add("hide"); }
     cal.hFormWrap.show();
   },
+  
 
   // (G) DELETE EVENT FOR SELECTED DATE
 };
