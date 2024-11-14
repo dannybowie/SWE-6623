@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="CSS/styles.css" rel="stylesheet">
     <script type="module" src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
-
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </head>
   <body>
     <header>
@@ -97,14 +96,18 @@
 
 
     </script>
-    <script>
-      $(document).ready(function() {
-      document.getElementById('evtSave').addEventListener('click', async (e) => {
-        e.preventDefault();
-        console.log('Save button clicked');
-        await save();
-      })});
-      </script>
+    <script type="module">
+      import { save } from './script.js'; // Import the save function if it is in another module
+   
+      document.addEventListener('DOMContentLoaded', function() {
+          document.getElementById('evtSave').addEventListener('click', async (e) => {
+              e.preventDefault();
+              console.log('Save button clicked');
+              await save(); // This should work if save() is properly defined or imported
+          });
+      });
+   </script>
+   
 
 
   </body>
