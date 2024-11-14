@@ -23,9 +23,12 @@ class EventHandler {
     this.dropdown = document.getElementById("evtType");
     this.employeeSelect = document.getElementById("emp");
     this.users = [];
-    
+    this.events = {};  // Store events
     this.fetchEventTypesFromFirestore().then(() => {
       this.createEventOptions();
+    });
+
+    this.fetchUsersFromFirestore().then(() => {
       this.createEmployeeOptions();
     });
 
@@ -79,30 +82,50 @@ class EventHandler {
       const querySnapshot = await getDocs(collection(db, "events"));
   
       // Clear existing data
-      cal.data = {};
+      this.events = {};
   
       // Fetch all events
       querySnapshot.forEach((doc) => {
         const { eventType, userId, details } = doc.data();
-        const [year, month, day] = details.date.split('-'); // Assuming 'details.date' is in 'YYYY-MM-DD' format
+  
+        // Check if date exists
+        if (!details.date || typeof details.date !== 'string') {
+          console.error('Invalid or missing date', details.date);
+          return; // Skip this event if the date is invalid
+        }
+  
+        // Try parsing the date, if it's not in the YYYY-MM-DD format
+        const date = new Date(details.date);
+        if (isNaN(date.getTime())) {
+          console.error('Invalid date structure', details.date);
+          return; // Skip event if the date cannot be parsed
+        }
+  
+        // Get year, month, and day from the parsed date
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Get 01-12 format
+        const day = String(date.getDate()).padStart(2, '0'); // Get 01-31 format
   
         // Initialize nested year/month/day structure
-        if (!cal.data[year]) {
-          cal.data[year] = {};
+        if (!this.events[year]) {
+          this.events[year] = {};
         }
-        if (!cal.data[year][month]) {
-          cal.data[year][month] = {};
+        if (!this.events[year][month]) {
+          this.events[year][month] = {};
         }
   
         // Add the event to the year/month/day collection
-        cal.data[year][month][day] = { eventType, userId, details };
+        this.events[year][month][day] = { eventType, userId, details };
       });
   
-      console.log("Events fetched and stored:", cal.data);
+      console.log("Events fetched and stored:", this.events);
+      cal.draw(); // Redraw calendar after fetching events
     } catch (error) {
       console.error("Error fetching events:", error);
     }
   }
+  
+  
   
 
   createEventOptions() {
@@ -122,7 +145,7 @@ class EventHandler {
       return;
     }
 
-    this.employeeSelect.innerHTML = ''; // Clear existing options
+    this.employeeSelect.innerHTML = '';
     this.users.forEach((employee) => {
       const opt = document.createElement("option");
       opt.value = employee.firstName + " " + employee.lastName;
@@ -147,23 +170,19 @@ class EventHandler {
 
 
   async save() {
-    console.log('Save function called');
-  
+
     const eventType = document.getElementById("evtType").value;
     const description = document.getElementById("evtTxt").value;
     const userId = document.getElementById("emp").value;
     const evtDateInput = document.getElementById("evtDate");
-    console.log("emp Name/ID: " + userId);
-    const rawDate = evtDateInput.value;
-    console.log("Save Raw : " + rawDate);
-  
+
+
     try {
       // Validate the rawDate
       if (!rawDate || typeof rawDate !== 'string') {
         throw new Error('Invalid date format');
       }
-  
-      // Create a new event object
+
       const newEvent = {
         eventType: eventType,
         userId: userId,
@@ -172,17 +191,11 @@ class EventHandler {
           description: description
         }
       };
-  
-      // Instead of using `newEvent.id`, let Firestore auto-generate the document ID
-      const newEventRef = await addDoc(collection(db, "events"), newEvent); // Firestore will auto-generate the ID
-      console.log("Event saved successfully!", newEventRef.id);
+
   
       // Refresh events after saving
       await this.fetchEventsFromFirestore();
-      await cal.hFormWrap.close();
-  
-      // Update the calendar display
-      this.updateCalendarDisplay();
+      this.resetForm();
     } catch (error) {
       console.error("Error saving event:", error);
       alert(`An error occurred while saving the event: ${error.message}`);
@@ -207,9 +220,7 @@ class EventHandler {
         // Use the correct document reference
         await deleteDoc(doc(db, "events", eventId));
         console.log("Event deleted successfully from Firestore");
-  
-        // Update the calendar display
-        this.updateCalendarDisplay();
+        await this.fetchEventsFromFirestore();
       } catch (error) {
         console.error("Error deleting event:", error);
         alert(`Failed to delete the event: ${error.message}`);
@@ -321,57 +332,44 @@ var cal = {
   },
 
   // (D) DRAW CALENDAR FOR SELECTED MONTH
-  draw : () => {
+  // (D) DRAW CALENDAR FOR SELECTED MONTH
+  draw: () => {
     // (D1) DAYS IN MONTH + START/END DAYS
-    // note - jan is 0 & dec is 11
-    // note - sun is 0 & sat is 6
-    cal.sMth = parseInt(cal.hMth.value); // selected month
-    cal.sYear = parseInt(cal.hYear.value); // selected year
-    let daysInMth = new Date(cal.sYear, cal.sMth+1, 0).getDate(), // number of days in selected month
-        startDay = new Date(cal.sYear, cal.sMth, 1).getDay(), // first day of the month
-        endDay = new Date(cal.sYear, cal.sMth, daysInMth).getDay(), // last day of the month
-        now = new Date(), // current date
-        nowMth = now.getMonth(), // current month
-        nowYear = parseInt(now.getFullYear()), // current year
-        nowDay = cal.sMth==nowMth && cal.sYear==nowYear ? now.getDate() : null ;
-
-    // (D2) LOAD DATA FROM LOCALSTORAGE
-    cal.data = localStorage.getItem("cal-" + cal.sMth + "-" + cal.sYear);
-    if (cal.data==null) {
-      localStorage.setItem("cal-" + cal.sMth + "-" + cal.sYear, "{}");
-      cal.data = {};
-    } else { cal.data = JSON.parse(cal.data); }
-
-    // (D3) DRAWING CALCULATIONS
-    // (D3-1) BLANK SQUARES BEFORE START OF MONTH
+    let daysInMth = new Date(cal.sYear, cal.sMth + 1, 0).getDate(),
+        startDay = new Date(cal.sYear, cal.sMth, 1).getDay(),
+        endDay = new Date(cal.sYear, cal.sMth, daysInMth).getDay(),
+        now = new Date(),
+        nowMth = now.getMonth(),
+        nowYear = now.getFullYear(),
+        nowDay = cal.sMth == nowMth && cal.sYear == nowYear ? now.getDate() : null;
+  
     let squares = [];
+  
+    // (D3-1) BLANK SQUARES BEFORE START OF MONTH
     if (cal.sMon && startDay != 1) {
-      let blanks = startDay==0 ? 7 : startDay ;
-      for (let i=1; i<blanks; i++) { squares.push("b"); }
+      let blanks = startDay == 0 ? 7 : startDay;
+      for (let i = 1; i < blanks; i++) { squares.push("b"); }
     }
     if (!cal.sMon && startDay != 0) {
-      for (let i=0; i<startDay; i++) { squares.push("b"); }
+      for (let i = 0; i < startDay; i++) { squares.push("b"); }
     }
-
+  
     // (D3-2) DAYS OF THE MONTH
-    for (let i=1; i<=daysInMth; i++) { squares.push(i); }
-
+    for (let i = 1; i <= daysInMth; i++) { squares.push(i); }
+  
     // (D3-3) BLANK SQUARES AFTER END OF MONTH
     if (cal.sMon && endDay != 0) {
-      let blanks = endDay==6 ? 1 : 7-endDay;
-      for (let i=0; i<blanks; i++) { squares.push("b"); }
+      let blanks = endDay == 6 ? 1 : 7 - endDay;
+      for (let i = 0; i < blanks; i++) { squares.push("b"); }
     }
     if (!cal.sMon && endDay != 6) {
-      let blanks = endDay==0 ? 6 : 6-endDay;
-      for (let i=0; i<blanks; i++) { squares.push("b"); }
+      let blanks = endDay == 0 ? 6 : 6 - endDay;
+      for (let i = 0; i < blanks; i++) { squares.push("b"); }
     }
-
+  
     // (D4) "RESET" CALENDAR
-    cal.hWrap.innerHTML = `<div class="calHead"></div>
-    <div class="calBody">
-      <div class="calRow"></div>
-    </div>`;
-
+    cal.hWrap.innerHTML = `<div class="calHead"></div><div class="calBody"><div class="calRow"></div></div>`;
+  
     // (D5) CALENDAR HEADER - DAY NAMES
     let wrap = cal.hWrap.querySelector(".calHead");
     for (let d of cal.days) {
@@ -380,69 +378,60 @@ var cal = {
       cell.innerHTML = d;
       wrap.appendChild(cell);
     }
-
+  
     // (D6) CALENDAR BODY - INDIVIDUAL DAYS & EVENTS
     wrap = cal.hWrap.querySelector(".calBody");
     let row = cal.hWrap.querySelector(".calRow");
-
-    // Function to format date as dd month yyyy
-    function formatDate(day, month, year) {
-      const monthNames = ["January", "February", "March", "April", "May", "June",
-                        "July", "August", "September", "October", "November", "December"];
-      return `${day} ${monthNames[month - 1]} ${year}`;
-    }
-
+  
     for (let i = 0; i < squares.length; i++) {
-      // Generate cell
       let cell = document.createElement("div");
       cell.className = "calCell";
-
+  
       // Check if today
       if (nowDay === squares[i] && cal.sMth === nowMth && cal.sYear === nowYear) {
         cell.classList.add("calToday");
-        }
-
+      }
+  
       // Blank squares
       if (squares[i] === "b") {
         cell.classList.add("calBlank");
-        }
-
-      // Get the formatted date for this cell
-      const formattedDate = `${cal.sYear}-${String(cal.sMth + 1).padStart(2, '0')}-${squares[i]}`;
-
-    if (cal.data[cal.sYear] && cal.data[cal.sYear][String(cal.sMth + 1).padStart(2, '0')] && cal.data[cal.sYear][String(cal.sMth + 1).padStart(2, '0')][squares[i]]) {
-      const eventRef = doc(db, `events/${cal.sYear}/${String(cal.sMth + 1).padStart(2, '0')}/${squares[i]}`, Object.keys(cal.data[cal.sYear][String(cal.sMth + 1).padStart(2, '0')][squares[i]])[0]);
-      
-      getDoc(eventRef).then((docSnapshot) => {
-        if (docSnapshot.exists()) {
-          const event = docSnapshot.data();
-          
-          cell.innerHTML = `<div class='evt'>${event.eventType}: ${event.userId}</div>`;
-          
-          // Add click handler for each event
-          cell.onclick = () => {
-            cal.show(cell);
-            };
-          }
-        });
-      
+      }
+  
+      // Get the formatted date for this cell (YYYY-MM-DD)
+      const formattedDate = `${cal.sYear}-${String(cal.sMth + 1).padStart(2, '0')}-${String(squares[i]).padStart(2, '0')}`;
+  
+      // Ensure the events data for this date exists
+      if (
+        cal.events &&
+        cal.events[cal.sYear] &&
+        cal.events[cal.sYear][String(cal.sMth + 1).padStart(2, '0')] &&
+        cal.events[cal.sYear][String(cal.sMth + 1).padStart(2, '0')][String(squares[i]).padStart(2, '0')]
+      ) {
+        const event = cal.events[cal.sYear][String(cal.sMth + 1).padStart(2, '0')][String(squares[i]).padStart(2, '0')];
+        cell.innerHTML = `<div class='evt'>${event.eventType}: ${event.userId}</div>`;
+        cell.onclick = () => {
+          cal.show(cell);
+        };
       } else {
-        // No events, just show the day number
+        // No event, just show the day number
         cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
-        cell.onclick = () => { cal.show(cell); };
-        }
-
-      // Append cell to row
+        cell.onclick = () => {
+          cal.show(cell);
+        };
+      }
+  
       row.appendChild(cell);
-
+  
       // Next row
       if ((i + 1) % 7 === 0 && i !== 0) {
         row = document.createElement("div");
         row.className = "calRow";
         wrap.appendChild(row);
-        }
-  }
+      }
+    }
   },
+  
+
 
   // (E) SHOW EDIT EVENT DOCKET FOR SELECTED DAY
   show : cell => {
