@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-import { getFirestore, doc, getDocs, getDoc, collection, arrayUnion, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { doc, collection, getDoc, getDocs, setDoc, addDoc, deleteDoc, getFirestore } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCxsEV7XU95eMCcYaWTQsr_1lpjlBOVOJ4",
@@ -16,12 +16,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 class EventHandler {
-  static generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
+ 
 
   constructor() {
     this.eventTypes = [];
@@ -82,43 +77,34 @@ class EventHandler {
   async fetchEventsFromFirestore() {
     try {
       const querySnapshot = await getDocs(collection(db, "events"));
+  
+      // Clear existing data
       cal.data = {};
-
-
+  
+      // Fetch all events
       querySnapshot.forEach((doc) => {
-        const { id, userId, eventDate, eventType, description } = doc.data();
-        
-        // Parse the eventDate string
-        const [day, month, year] = eventDate.split(' ');
-        const parsedDate = `${parseInt(day)} ${month} ${year}`;
-
-        if (!cal.data[parsedDate]) {
-          cal.data[parsedDate] = {};
+        const { eventType, userId, details } = doc.data();
+        const [year, month, day] = details.date.split('-'); // Assuming 'details.date' is in 'YYYY-MM-DD' format
+  
+        // Initialize nested year/month/day structure
+        if (!cal.data[year]) {
+          cal.data[year] = {};
         }
-
-        cal.data[parsedDate][id] = {
-          type: eventType,
-          description: description,
-          firstName: '', // You might want to fetch this from the users collection
-          lastName: '' // You might want to fetch this from the users collection
-        };
-        });
-      
-      // Store the data in localStorage
-      localStorage.setItem(`cal-${cal.sMth}-${cal.sYear}`, JSON.stringify(cal.data));
-
+        if (!cal.data[year][month]) {
+          cal.data[year][month] = {};
+        }
+  
+        // Add the event to the year/month/day collection
+        cal.data[year][month][day] = { eventType, userId, details };
+      });
+  
       console.log("Events fetched and stored:", cal.data);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
   }
+  
 
-  createEventOptions() {
-    if (!this.dropdown) {
-      console.error("Element with id 'evtType' not found");
-      return;
-    }
-  }
   createEventOptions() {
     this.dropdown.innerHTML = ''; // Clear existing options
     this.eventTypes.forEach((eventType) => {
@@ -128,6 +114,7 @@ class EventHandler {
       this.dropdown.appendChild(opt);
     });
   }
+  
 
   createEmployeeOptions() {
     if (!this.employeeSelect) {
@@ -163,39 +150,37 @@ class EventHandler {
     console.log('Save function called');
   
     const eventType = document.getElementById("evtType").value;
-
     const description = document.getElementById("evtTxt").value;
     const userId = document.getElementById("emp").value;
     const evtDateInput = document.getElementById("evtDate");
-
+    console.log("emp Name/ID: " + userId);
     const rawDate = evtDateInput.value;
-    const [day, month, year] = evtDateInput.value.split('-');
-
-    const formattedDate = `${day} ${this.getFormattedMonthName(month)} ${year}`;
-
-    console.log("FormattedDate " + formattedDate);
+    console.log("Save Raw : " + rawDate);
+  
     try {
-      
-
+      // Validate the rawDate
+      if (!rawDate || typeof rawDate !== 'string') {
+        throw new Error('Invalid date format');
+      }
+  
       // Create a new event object
       const newEvent = {
-      id: EventHandler.generateUUID(),
         eventType: eventType,
-        description: description,
         userId: userId,
-        eventDate: formattedDate,
-        timestamp: new Date()
+        details: {
+          date: rawDate,
+          description: description
+        }
       };
   
-      // Add the new event to the events collection
-      await setDoc(doc(db, "events", formattedDate), newEvent);
+      // Instead of using `newEvent.id`, let Firestore auto-generate the document ID
+      const newEventRef = await addDoc(collection(db, "events"), newEvent); // Firestore will auto-generate the ID
+      console.log("Event saved successfully!", newEventRef.id);
   
-      console.log("Event saved successfully!");
-      
       // Refresh events after saving
       await this.fetchEventsFromFirestore();
       await cal.hFormWrap.close();
-
+  
       // Update the calendar display
       this.updateCalendarDisplay();
     } catch (error) {
@@ -203,6 +188,7 @@ class EventHandler {
       alert(`An error occurred while saving the event: ${error.message}`);
     }
   }
+  
 
   getFormattedMonthName(monthNumber) {
     const monthNames = [
@@ -215,28 +201,29 @@ class EventHandler {
   async del() {
     if (confirm("Delete event?")) {
       const selectedDay = document.getElementById("evtDate").value;
-      
+      const eventId = document.getElementById("evtId").value; // Assuming you have event ID in the form
+  
       try {
-        await deleteDoc(doc(db, "events", selectedDay));
+        // Use the correct document reference
+        await deleteDoc(doc(db, "events", eventId));
         console.log("Event deleted successfully from Firestore");
-        
+  
         // Update the calendar display
         this.updateCalendarDisplay();
-        
-      
       } catch (error) {
         console.error("Error deleting event:", error);
         alert(`Failed to delete the event: ${error.message}`);
       }
     }
   }
+  
 
-  // New method to update the calendar display
   updateCalendarDisplay() {
     this.fetchEventsFromFirestore().then(() => {
       cal.draw();
     });
   }
+  
   
 
   
@@ -421,22 +408,24 @@ var cal = {
         }
 
       // Get the formatted date for this cell
-      const formattedDate = formatDate(squares[i], cal.sMth + 1, cal.sYear);
-      cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
+      const formattedDate = `${cal.sYear}-${String(cal.sMth + 1).padStart(2, '0')}-${squares[i]}`;
 
+    if (cal.data[cal.sYear] && cal.data[cal.sYear][String(cal.sMth + 1).padStart(2, '0')] && cal.data[cal.sYear][String(cal.sMth + 1).padStart(2, '0')][squares[i]]) {
+      const eventRef = doc(db, `events/${cal.sYear}/${String(cal.sMth + 1).padStart(2, '0')}/${squares[i]}`, Object.keys(cal.data[cal.sYear][String(cal.sMth + 1).padStart(2, '0')][squares[i]])[0]);
       
-      if (cal.data[formattedDate] && Object.keys(cal.data[formattedDate]).length > 0) {
-        const event = cal.data[formattedDate][Object.keys(cal.data[formattedDate])[0]];
-        
-
-        // Display event details
-       cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
-        cell.innerHTML = `<div class='evt'>${event.type}: ${event.employee}</div>`;
-
-        // Add click handler for each event
-        cell.onclick = () => {
-          cal.show(cell);
-        };
+      getDoc(eventRef).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const event = docSnapshot.data();
+          
+          cell.innerHTML = `<div class='evt'>${event.eventType}: ${event.userId}</div>`;
+          
+          // Add click handler for each event
+          cell.onclick = () => {
+            cal.show(cell);
+            };
+          }
+        });
+      
       } else {
         // No events, just show the day number
         cell.innerHTML = `<div class="cellDate">${squares[i]}</div>`;
