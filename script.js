@@ -51,11 +51,18 @@ class EventHandler {
     }
   }
 
+  resetForm() {
+    document.getElementById("evtType").value = "";
+    document.getElementById("evtTxt").value = "";
+    document.getElementById("evtDate").value = "";
+  }
+
   // Method to close the form
   closeForm() {
     const eventForm = document.getElementById("calForm");
     if (eventForm) {
       eventForm.close(); // Close the form
+      this.resetForm();
     } else {
       console.error("Event form (calForm) not found in the DOM.");
     }
@@ -239,6 +246,7 @@ class EventHandler {
 
 }
 
+export { EventHandler };
 var cal = {
   sMon: false,
   data: {},
@@ -267,14 +275,40 @@ var cal = {
     cal.hMth.onchange = cal.draw;
     cal.hYear.onchange = cal.draw;
 
+    for (let i=0; i<12; i++) {
+      let opt = document.createElement("option");
+      opt.value = i;
+      opt.innerHTML = cal.months[i];
+      if (i==cal.sMth) { opt.selected = true; }
+      cal.hMth.appendChild(opt);
+    }
+
+
+    document.getElementById("calBack").onclick = () => cal.pshift();
+    document.getElementById("calNext").onclick = () => cal.pshift(1);
+
     cal.draw();
   },
+
+    // (C) SHIFT CURRENT PERIOD BY 1 MONTH
+    pshift : forward => {
+      cal.sMth = parseInt(cal.hMth.value);
+      cal.sYear = parseInt(cal.hYear.value);
+      if (forward) { cal.sMth++; } else { cal.sMth--; }
+      if (cal.sMth > 11) { cal.sMth = 0; cal.sYear++; }
+      if (cal.sMth < 0) { cal.sMth = 11; cal.sYear--; }
+      cal.hMth.value = cal.sMth;
+      cal.hYear.value = cal.sYear;
+      cal.draw();
+    },
 
   // Add the event details to the event click functionality
 draw: () => {
   let daysInMth = new Date(cal.sYear, cal.sMth + 1, 0).getDate(),
       startDay = new Date(cal.sYear, cal.sMth, 1).getDay(),
       wrap = cal.hWrap;
+
+     
 
   wrap.innerHTML = "";
 

@@ -97,17 +97,6 @@
 
     </script>
 
-    <script type="module">
-      import { save } from './script.js'; // Import the save function if it is in another module
-
-      document.addEventListener('DOMContentLoaded', function() {
-          document.getElementById('evtSave').addEventListener('click', async (e) => {
-              e.preventDefault();
-              console.log('Save button clicked');
-              await save(); // This should work if save() is properly defined or imported
-          });
-      });
-   </script>
    
 
 

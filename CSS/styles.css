@@ -21,6 +21,11 @@ body {
 #calPeriod {
   padding: 15px;
   background: var(--bg-color-a);
+  width: 100%;
+}
+
+#calYear {
+  max-width: auto;
 }
 #calPeriod input,
 #calPeriod select {
