@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="CSS/styles.css" rel="stylesheet">
     <script type="module" src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js"></script>
-
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   </head>
   <body>
     <header>
@@ -16,7 +15,7 @@
       </div>
       <div class="logout">
 
-          <a href="/SWE-6623/index.html" id="logoutBtn">Logout</a>
+          <a href="../index.html" id="logoutBtn">Logout</a>
 
       </div>
   </header>
@@ -25,12 +24,12 @@
   <div id="columnList">
       <div class="columnItem" style="background-color: #ffcccb; border: solid 2px;">Employee Anniversary Date</div>
       <div class="columnItem" style="background-color: #ffff00; border: solid 2px;">Employee Birthday</div>
-      <div class="columnItem" style="background-color: #0000ff; border: solid 2px;">Company Events</div>
+      <div class="columnItem" style="background-color: #0077ff; border: solid 2px;">Company Events</div>
       <div class="columnItem" style="background-color: #ffa500; border: solid 2px;">Company Holidays</div>
       <div class="columnItem" style="background-color: #808080; border: solid 2px;">Out of the Office</div>
       <div class="columnItem" style="background-color: #00ff00; border: solid 2px;">Personal Time</div>
-      <div class="columnItem" style="background-color: #800080; border: solid 2px;">Training</div>
-      <div class="columnItem" style="background-color: #ff00ff; border: solid 2px;">Visitor</div>
+      <div class="columnItem" style="background-color: #fa18fa; border: solid 2px;">Training</div>
+      <div class="columnItem" style="background-color: #bb12bb; border: solid 2px;">Visitor</div>
       <div class="columnItem" style="background-color: #ff0000; border: solid 2px;">Sick Day</div>
   </div>
 
@@ -73,10 +72,10 @@
 </dialog>
 
     <!-- <script type="module" src="../src/login.js"></script> -->
-    <script type="module" src="/SWE-6623/src/uiManager.js"></script>
-    <script type="module" src="/SWE-6623/script.js"></script>
+    <script type="module" src="./src/uiManager.js"></script>
+    <script type="module" src="./script.js"></script>
     <script type="module">
-      import { auth, db } from '/SWE-6623/src/firebaseAuth.js';
+      import { auth, db } from '../src/firebaseAuth.js';
       import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
       auth.onAuthStateChanged(async (user) => {
@@ -97,14 +96,8 @@
 
 
     </script>
-    <script>
-      $(document).ready(function() {
-      document.getElementById('evtSave').addEventListener('click', async (e) => {
-        e.preventDefault();
-        console.log('Save button clicked');
-        await save();
-      })});
-      </script>
+
+   
 
 
   </body>
