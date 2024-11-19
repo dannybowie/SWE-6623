@@ -26,6 +26,12 @@ class EventHandler {
     this.fetchUsersFromFirestore();
     this.fetchEventsFromFirestore();
 
+
+    this.loggedInUser = this.getLoggedInUser();
+
+    this.disableButtonsIfNotHR();
+    
+
     // Bind the save button to the save method
     const saveButton = document.getElementById("evtSave");
     if (saveButton) {
@@ -49,6 +55,21 @@ class EventHandler {
     } else {
       console.error("Close button (evtClose) not found in the DOM.");
     }
+  }
+
+  getLoggedInUser() {
+    return
+  }
+
+  disableButtonsIfNotHR() {
+    const saveButton = document.getElementById("evtSave");
+    const deleteButton = document.getElementById("evtDel");
+  
+    if(this.loggedInUser && this.loggedInUser.department !== "Human Ressources") {
+      if (saveButton) saveButton.disabled = true;
+      if (deleteButton) deleteButton.disabled = true;
+    }
+    
   }
 
   resetForm() {
