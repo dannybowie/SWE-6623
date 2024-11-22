@@ -1,5 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import { doc, collection, getDocs, addDoc, deleteDoc, getFirestore } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";  // Import auth
+import { doc, updateDoc, collection, getDocs, addDoc, deleteDoc, getFirestore } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+import { auth } from '/src/firebaseAuth.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCxsEV7XU95eMCcYaWTQsr_1lpjlBOVOJ4",
@@ -14,23 +17,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+
 class EventHandler {
   constructor() {
     this.eventTypes = [];
     this.users = [];
     this.dropdown = document.getElementById("evtType");
     this.employeeSelect = document.getElementById("emp");
+    this.auth = getAuth();
+    this.loggedInUser = this.getLoggedInUser(); 
+    
 
     // Existing initialization logic
     this.fetchEventTypesFromFirestore();
     this.fetchUsersFromFirestore();
     this.fetchEventsFromFirestore();
+    this.initAuthListener();
 
-
-    this.loggedInUser = this.getLoggedInUser();
+    
 
     this.disableButtonsIfNotHR();
-    
 
     // Bind the save button to the save method
     const saveButton = document.getElementById("evtSave");
@@ -57,25 +63,87 @@ class EventHandler {
     }
   }
 
+  
+  
+   // Get the currently logged-in user from Firebase
   getLoggedInUser() {
-    return
+    const user = auth.currentUser;
+    if (user) {
+      console.log('Logged in user:', user);
+      const matchedUser = this.users.find(u => u.id === user.uid);
+      console.log('Matched user:', matchedUser);
+      return matchedUser;
+    } else {
+     console.log('No user logged in');
+     return null;
+   }
   }
 
+
+  // Disable Save and Delete buttons if the user is not from HR
   disableButtonsIfNotHR() {
     const saveButton = document.getElementById("evtSave");
     const deleteButton = document.getElementById("evtDel");
-  
-    if(this.loggedInUser && this.loggedInUser.department !== "Human Ressources") {
+
+    // Check if the logged-in user exists and if they are not from the HR department
+    if (this.loggedInUser && this.loggedInUser.department !== "Human Resources") {
       if (saveButton) saveButton.disabled = true;
       if (deleteButton) deleteButton.disabled = true;
     }
-    
   }
+
+  initAuthListener() {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log('User logged in:', user);
+  
+        // Wait for users to be fetched
+        if (this.users.length === 0) {
+          await this.fetchUsersFromFirestore(); // Ensure users are loaded
+        }
+  
+        const currentUser = this.users.find(u => u.id === user.uid);
+        if (currentUser) {
+          console.log('Matched user:', currentUser);
+          this.loggedInUser = currentUser;
+          this.updateUI(currentUser);
+        } else {
+          console.warn(`User with UID ${user.uid} not found in Firestore`);
+          this.loggedInUser = null;
+        }
+      } else {
+        console.log('No user is logged in');
+        this.loggedInUser = null;
+      }
+    });
+  }
+  
+
+  updateUIForUser(user) {
+    console.log('Users array:', this.users);
+    const currentUser = this.users.find(u => u.id === user.uid);
+    if (currentUser) {
+      console.log('Found matching user for UID:', user.uid);
+      this.updateUI(currentUser);
+    } else {
+      console.warn(`User with UID ${user.uid} not found in the users array`);
+    }
+  }
+  
+  
+  // Add this method to handle individual user UI updates
+  updateUI(user) {
+    if (user.department === 'Human Resources') {
+
+    } else
+      this.disableButtonsIfNotHR()
+    }
 
   resetForm() {
     document.getElementById("evtType").value = "";
     document.getElementById("evtTxt").value = "";
     document.getElementById("evtDate").value = "";
+    document.getElementById("evtPTO").value = "";
   }
 
   // Method to close the form
@@ -137,11 +205,13 @@ class EventHandler {
     try {
       const querySnapshot = await getDocs(collection(db, "users"));
       this.users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log('Users fetched:', this.users);
       this.createEmployeeOptions();
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   }
+  
 
   // Fetch events from Firestore and store in cal.data
   async fetchEventsFromFirestore() {
@@ -153,11 +223,12 @@ class EventHandler {
         const { eventType, userId, details } = doc.data();
         const eventId = doc.id; // Get the event ID from Firestore
         const formattedDate = details.date;
+        const pto = details.pto || '';
 
         if (!cal.data[formattedDate]) {
           cal.data[formattedDate] = [];
         }
-        cal.data[formattedDate].push({ eventType, userId, details, eventId }); // Include eventId
+        cal.data[formattedDate].push({ eventType, userId, details, eventId, pto }); // Include pto
       });
 
       console.log("Fetched events:", cal.data); // Log the events after fetching
@@ -196,33 +267,38 @@ class EventHandler {
       console.error("Event form (calForm) not found in the DOM");
       return;
     }
-
-    eventForm.showModal(); // Show the dialog box
-
-    // Format the date to YYYY-MM-DD
+  
+    eventForm.showModal();
+  
     const [month, day, year] = date.split('-');
     const formattedDate = `${year}-${month}-${day}`;
+  
     const dateField = document.getElementById("evtDate");
     if (dateField) {
-      dateField.value = formattedDate; // Set the date
+      dateField.value = formattedDate;
+      
       if (event) {
-        // Set the event ID for deletion
+        // Set the event ID for updating
         dateField.setAttribute("data-event-id", event.eventId);
+        
+        // Populate form fields with existing event data
+        document.getElementById("evtType").value = event.eventType;
+        document.getElementById("emp").value = event.userId; // Adjust if needed
+        document.getElementById("evtTxt").value = event.details.description;
+        const ptoValue = parseInt(event.details.pto, 10);
+        const ptoField = document.getElementById("evtPTO");
+        if (ptoField && !isNaN(ptoValue)) {
+          ptoField.value = ptoValue.toString(); // Convert back to string for display
+        } else {
+          console.error('Invalid PTO value or evtPTO element not found');
+        }
       } else {
         dateField.removeAttribute("data-event-id"); // Remove attribute if no event is passed
       }
     }
-
-    if (event) {
-      // Set event details
-      const descriptionField = document.getElementById("evtTxt");
-      const employeeSelect = document.getElementById("emp");
-      const eventTypeDropdown = document.getElementById("evtType");
-
-      if (descriptionField) descriptionField.value = event.details.description;
-      if (employeeSelect) employeeSelect.value = event.userId; // Adjust if needed
-      if (eventTypeDropdown) eventTypeDropdown.value = event.eventType;
-    }
+  
+    // Add a flag to indicate we're editing an event
+    eventForm.dataset.editingEvent = !!event ? 'true' : 'false';
   }
 
   // Save event to Firestore
@@ -231,37 +307,54 @@ class EventHandler {
     const description = document.getElementById("evtTxt").value;
     const userId = this.employeeSelect.value;
     const rawDate = document.getElementById("evtDate").value;
-
-    // Log form values to verify they're being populated correctly
+    const pto = document.getElementById("evtPTO").value;
+  
     console.log("Saving event:", {
       eventType,
       description,
       userId,
       rawDate
     });
-
+  
     if (!eventType || !description || !userId || !rawDate) {
       console.error("Please fill in all the fields.");
-      return; // Prevent saving if any field is empty
+      return;
     }
-
-    // Convert the raw date to mm-dd-yyyy format before saving
+  
     const formattedDate = this.formatDate(rawDate);
-
+  
     try {
-      const newEvent = {
-        eventType,
-        userId,
-        details: { date: formattedDate, description }
-      };
-
-      await addDoc(collection(db, "events"), newEvent);
-      //console.log("Event saved:", newEvent); // Log the saved event
-      await this.fetchEventsFromFirestore(); // Fetch events again after saving
-      //alert("Event saved successfully!");
-      document.getElementById("calForm").close(); // Close the form
+      const eventForm = document.getElementById("calForm");
+      const isEditing = eventForm.dataset.editingEvent === 'true';
+      const eventId = document.getElementById("evtDate").getAttribute("data-event-id");
+  
+      if (isEditing && eventId) {
+        // Update existing event
+        await updateDoc(doc(db, "events", eventId), {
+          eventType,
+          userId,
+          details: { date: formattedDate, description, pto } // Add pto to the details object
+        });
+        console.log("Existing event updated:", eventId);
+      } else {
+        // Create new event
+        const newEvent = {
+          eventType,
+          userId,
+          details: { date: formattedDate, description, pto } // Add pto to the details object
+        };
+        const docRef = await addDoc(collection(db, "events"), newEvent);
+        console.log("New event created:", docRef.id);
+      }
+  
+      await this.fetchEventsFromFirestore();
+      document.getElementById("calForm").close();
+  
+      // Reset the editing flag
+      delete eventForm.dataset.editingEvent;
+      document.getElementById("evtDate").removeAttribute("data-event-id");
     } catch (error) {
-      console.error("Error saving event:", error);
+      console.error("Error saving/updating event:", error);
     }
   }
 
@@ -437,36 +530,40 @@ openEventForm(date, event = null) {
     return;
   }
 
-  // Show the dialog box
-  eventForm.showModal(); // Use showModal() to display the dialog box
+  eventForm.showModal();
 
-  // Format the date to YYYY-MM-DD
-  const [month, day, year] = date.split('-'); // Assuming date is in MM-DD-YYYY format
-  const formattedDate = `${year}-${month}-${day}`; // Convert to YYYY-MM-DD
+  const [month, day, year] = date.split('-');
+  const formattedDate = `${year}-${month}-${day}`;
 
   // Update the date field with the formatted date
   const dateField = document.getElementById("evtDate");
   if (dateField) {
-    dateField.value = formattedDate; // Set the date
   } else {
-    console.error("Date field (evtDate) not found in the DOM");
+      dateField.removeAttribute("data-event-id"); // Remove attribute if no event is passed
   }
+
+  // Add a flag to indicate we're editing an event
+  eventForm.dataset.editingEvent = !!event ? 'true' : 'false';
 
   // If an event is passed, populate the form with event data
   if (event) {
-    // Set the event details
+    // Populate form fields with existing event data
     const descriptionField = document.getElementById("evtTxt");
     const employeeSelect = document.getElementById("emp");
     const eventTypeDropdown = document.getElementById("evtType");
 
-    if (descriptionField && employeeSelect && eventTypeDropdown) {
+    if (descriptionField && employeeSelect && eventTypeDropdown && ptoField) {
       descriptionField.value = event.details.description; // Set description field
-      employeeSelect.value = event.userId; // Set employee dropdown value (you might need to adjust this based on how users are stored)
-      eventTypeDropdown.value = event.eventType; // Set event type dropdown
+      employeeSelect.value = event.userId;
+      eventTypeDropdown.value = event.eventType;
     }
-  }
+
+    
+    
+    
+  }}
 }
-}
+
 
 // Initialize calendar and event handler
 let eventHandler;
