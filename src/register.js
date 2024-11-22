@@ -31,7 +31,8 @@ register_submit.addEventListener('click', (event) => {
                 email: email,
                 firstName: nameFirst,
                 lastName: nameLast,
-                department: department
+                department: department,
+                PTO: 40
             };
 
             showMessage('User account created successfully. Saving details...', 'signUpMessage');

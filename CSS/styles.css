@@ -92,6 +92,7 @@ body {
   margin-top: 5px;
   list-style-type: none;
   padding-left: 0;
+  max-width: 100%;
 }
 .event-list {
   padding-left: 0;
@@ -104,9 +105,9 @@ body {
 }
 .evt {
   font-size: 14px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  white-space: wrap;
+  text-overflow: wrap;
+  
   cursor: pointer;
 }
 
@@ -253,4 +254,11 @@ header {
 .event-name {
   font-weight: bold;
   margin-right: 5px;
+}
+
+#evtPTO {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid;
 }
