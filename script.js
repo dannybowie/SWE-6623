@@ -221,8 +221,8 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
     const eventType = document.getElementById("evtType").value;
     const userId = document.getElementById("emp").value; // Get selected user ID
     const description = document.getElementById("evtDescription").value;
-    const pto = parseFloat(document.getElementById("evtPTO").value) || 0;
-  
+    const pto = parseFloat(document.getElementById("evtPTO").value) || 0; // PTO for the event
+    
     if (!date || !eventType || !userId) {
       alert("Please fill out all required fields.");
       return;
@@ -232,7 +232,7 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
     const eventId = document.getElementById("evtDate").getAttribute("data-event-id");
   
     try {
-      // Fetch user's full name from Firestore
+      // Fetch user's data from Firestore
       const userDocRef = doc(db, "users", userId);
       const userDoc = await getDoc(userDocRef);
   
@@ -243,13 +243,36 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
   
       const userData = userDoc.data();
       const userFullName = `${userData.firstName} ${userData.lastName}`;
+      let userPTOBalance = userData.PTO || 0; // Retrieve PTO balance from Firestore, default to 0 if undefined
+  
+      console.log("Current PTO balance:", userPTOBalance); // Debugging: Log current PTO balance
+  
+      // If editing, adjust PTO balance by removing the old event's PTO amount
+      if (eventId) {
+        const oldEvent = cal.data[date]?.find((event) => event.eventId === eventId);
+        if (oldEvent && oldEvent.details.pto) {
+          userPTOBalance += oldEvent.details.pto; // Add back the old PTO amount
+        }
+      }
+  
+      // Subtract new PTO amount from user's balance
+      if (userPTOBalance < pto) {
+        alert("Insufficient PTO balance.");
+        return;
+      }
+  
+      // Deduct PTO from user's balance
+      userPTOBalance -= pto;
+  
+      // Update user PTO balance in Firestore
+      await updateDoc(userDocRef, { PTO: userPTOBalance });
   
       // Prepare event data
       const eventData = {
         date,
         eventType,
         userId,
-        userName: userFullName, // Save user's full name
+        userName: userFullName,
         details: { description, pto },
       };
   
@@ -279,6 +302,7 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
       this.clearForm();
       document.getElementById("calForm").close();
       
+  
     } catch (error) {
       console.error("Error saving event:", error);
       
@@ -286,39 +310,69 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
   }
   
   
+
+  async deleteEvent() {
+    const eventId = document.getElementById("evtDate").getAttribute("data-event-id");
   
+    if (!eventId) {
+      alert("No event selected for deletion.");
+      return;
+    }
   
-
-  // Delete Event
-// Delete Event
-async deleteEvent() {
-  const eventId = document.getElementById("evtDate").getAttribute("data-event-id"); // Get event ID from the form
-
-  if (!eventId) {
-    alert("No event selected for deletion.");
-    return;
+    try {
+      // Find the event in the calendar data
+      let eventToDelete = null;
+      let dateToDeleteFrom = null;
+  
+      // Loop through each date and its events in cal.data to find the event
+      for (const [date, events] of Object.entries(cal.data)) {
+        const eventIndex = events.findIndex((event) => event.eventId === eventId);
+        if (eventIndex > -1) {
+          eventToDelete = events[eventIndex];
+          dateToDeleteFrom = date;
+          events.splice(eventIndex, 1); // Remove the event from local data
+          break;
+        }
+      }
+  
+      if (!eventToDelete) {
+        alert("Event not found.");
+        return;
+      }
+  
+      // Debugging: log the event and date found for deletion
+      console.log("Event to delete:", eventToDelete);
+      console.log("Event found on date:", dateToDeleteFrom);
+  
+      // Update the user's PTO balance
+      const userDocRef = doc(db, "users", eventToDelete.userId);
+      const userDoc = await getDoc(userDocRef);
+  
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const updatedPTOBalance = (userData.PTO || 0) + (eventToDelete.details.pto || 0);
+  
+        // Update PTO balance in Firestore
+        await updateDoc(userDocRef, { PTO: updatedPTOBalance });
+        console.log(`Updated PTO balance for ${userData.firstName} ${userData.lastName}: ${updatedPTOBalance}`);
+      }
+  
+      // Delete the event document from Firestore
+      const eventRef = doc(db, "events", eventId);
+      await deleteDoc(eventRef);
+      console.log(`Event with ID ${eventId} deleted.`);
+  
+      // Redraw the calendar and close the form
+      cal.draw();
+      this.closeForm();
+      
+  
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      
+    }
   }
-
-  try {
-    // Reference the event document in Firestore using eventId
-    const eventRef = doc(db, "events", eventId);
-
-    // Delete the event document
-    await deleteDoc(eventRef);
-    console.log(`Event with ID ${eventId} deleted successfully.`);
-
-    // Refresh events in the calendar
-    await this.fetchEvents();
-
-    // Close the form
-    this.closeForm();
-
-    
-  } catch (error) {
-    console.error("Error deleting event:", error);
-    s
-  }
-}
+  
 
 
   // Close Event Form
