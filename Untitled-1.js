@@ -90,15 +90,13 @@ class EventHandler {
   async fetchEventTypes() {
     try {
       const querySnapshot = await getDocs(collection(db, "eventType"));
-      const eventTypes = querySnapshot.docs.map((doc) => doc.data().name);
-  
-      console.log("Fetched event types:", eventTypes); // Debugging
-      this.populateEventTypeDropdown("evtType", eventTypes, "--- Select Event Type ---");
+      this.eventTypes = querySnapshot.docs.map((doc) => doc.data().name);
+      console.log("Fetched event types:", this.eventTypes); // Debug log
+      this.populateDropdown("evtType", this.eventTypes, "--- Select Event Type ---");
     } catch (error) {
       console.error("Error fetching event types:", error);
     }
   }
-  
   
 
   // Fetch Users
@@ -142,42 +140,36 @@ class EventHandler {
   };
   
   // Fetch Users
-  async fetchUsers() {
-    try {
-      const querySnapshot = await getDocs(collection(db, "users"));
-      const users = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-  
-      console.log("Fetched users:", users); // Debugging
-      this.populateUserDropdown("emp", users, "--- Select Employee ---");
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
+async fetchUsers() {
+  try {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    this.users = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    
+    // Create options as { value: id, text: fullName }
+    const userOptions = this.users.map((user) => ({
+      value: user.id,
+      text: `${user.firstName} ${user.lastName}`,
+    }));
+    
+    this.populateDropdown("emp", userOptions, "--- Select Employee ---");
+  } catch (error) {
+    console.error("Error fetching users:", error);
   }
-  
-
-populateUserDropdown(elementId, users, placeholder) {
-  const dropdown = document.getElementById(elementId);
-  dropdown.innerHTML = `<option value="">${placeholder}</option>`; // Placeholder option
-
-  users.forEach((user) => {
-    const optElement = document.createElement("option");
-    optElement.value = user.id; // Use the user ID for Firestore lookups
-    optElement.textContent = `${user.firstName} ${user.lastName}`; // Display full name
-    dropdown.appendChild(optElement);
-  });
 }
 
-populateEventTypeDropdown(elementId, eventTypes, placeholder) {
+// Updated Populate Dropdown Method
+// Updated Populate Dropdown Method
+populateDropdown(elementId, options, placeholder) {
   const dropdown = document.getElementById(elementId);
-  dropdown.innerHTML = `<option value="">${placeholder}</option>`; // Placeholder option
-
-  eventTypes.forEach((eventType) => {
+  dropdown.innerHTML = `<option value="">${placeholder}</option>`; // Add placeholder as the first option
+  
+  options.forEach((option) => {
     const optElement = document.createElement("option");
-    optElement.value = eventType; // Use the event type name as the value
-    optElement.textContent = eventType; // Display the event type name
+    optElement.value = option.value; // Use the unique ID (e.g., user ID)
+    optElement.textContent = option.text; // Display the full name (or other user-friendly text)
     dropdown.appendChild(optElement);
   });
 }
@@ -420,7 +412,7 @@ const cal = {
             this.data[date].forEach((event) => {
               const eventDiv = document.createElement("div");
               eventDiv.className = "evt";
-              eventDiv.innerHTML = `${event.eventType}: ${event.userName}`;
+              eventDiv.innerHTML = `${event.eventType}: ${event.userId}`;
               eventsContainer.appendChild(eventDiv);
             });
 
