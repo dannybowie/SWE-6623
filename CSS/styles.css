@@ -247,7 +247,7 @@ header {
   font-weight: bold;
 }
 
-.logout {
+.logout, .report {
   margin-left: auto;
 }
 
