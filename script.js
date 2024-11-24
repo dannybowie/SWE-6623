@@ -201,9 +201,11 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
   
     if (event) {
       document.getElementById("evtType").value = event.eventType;
-      document.getElementById("emp").value = event.userId; // Use UID
+      document.getElementById("emp").value = event.userId; // Populate with the user ID
       document.getElementById("evtDescription").value = event.details.description;
       document.getElementById("evtPTO").value = event.details.pto || 0;
+  
+      // Store the eventId for later use during saving
       dateField.setAttribute("data-event-id", event.eventId);
     } else {
       this.clearForm();
@@ -217,7 +219,7 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
   
     const date = document.getElementById("evtDate").value;
     const eventType = document.getElementById("evtType").value;
-    const userId = document.getElementById("emp").value; // Employee UID from dropdown
+    const userId = document.getElementById("emp").value; // Get selected user ID
     const description = document.getElementById("evtDescription").value;
     const pto = parseFloat(document.getElementById("evtPTO").value) || 0;
   
@@ -226,33 +228,53 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
       return;
     }
   
-    // Retrieve user data
-    const userDocRef = doc(db, "users", userId);
-    const userDoc = await getDoc(userDocRef);
-  
-    if (!userDoc.exists()) {
-      alert("The selected employee does not exist.");
-      return;
-    }
-  
-    const userData = userDoc.data();
-    const userName = `${userData.firstName} ${userData.lastName}`;
-  
-    const eventData = {
-      date,
-      eventType,
-      userId, // Save UID
-      userName, // Save display name
-      details: { description, pto },
-    };
+    // Retrieve eventId if it exists (editing an event)
+    const eventId = document.getElementById("evtDate").getAttribute("data-event-id");
   
     try {
-      const eventRef = await addDoc(collection(db, "events"), eventData);
-      console.log("Event saved with ID:", eventRef.id);
+      // Fetch user's full name from Firestore
+      const userDocRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userDocRef);
   
+      if (!userDoc.exists()) {
+        alert("The selected employee does not exist.");
+        return;
+      }
+  
+      const userData = userDoc.data();
+      const userFullName = `${userData.firstName} ${userData.lastName}`;
+  
+      // Prepare event data
+      const eventData = {
+        date,
+        eventType,
+        userId,
+        userName: userFullName, // Save user's full name
+        details: { description, pto },
+      };
+  
+      if (eventId) {
+        // Update existing event
+        const eventRef = doc(db, "events", eventId);
+        await updateDoc(eventRef, eventData);
+        console.log(`Event with ID ${eventId} updated.`);
+      } else {
+        // Create a new event
+        const eventRef = await addDoc(collection(db, "events"), eventData);
+        console.log(`New event created with ID ${eventRef.id}`);
+        eventData.eventId = eventRef.id; // Store the generated ID
+      }
+  
+      // Update local calendar data and redraw the calendar
       if (!cal.data[date]) cal.data[date] = [];
-      cal.data[date].push({ ...eventData, eventId: eventRef.id });
-      cal.draw();
+      const existingEventIndex = cal.data[date].findIndex((event) => event.eventId === eventId);
+      if (existingEventIndex > -1) {
+        cal.data[date][existingEventIndex] = { ...eventData, eventId };
+      } else {
+        cal.data[date].push({ ...eventData, eventId });
+      }
+  
+      cal.draw(); // Redraw calendar to reflect changes
   
       this.clearForm();
       document.getElementById("calForm").close();
@@ -264,23 +286,40 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
   }
   
   
+  
+  
 
   // Delete Event
-  async deleteEvent() {
-    const eventId = document.getElementById("evtDate").getAttribute("data-event-id");
-    if (!eventId) {
-      alert("No event selected for deletion.");
-      return;
-    }
+// Delete Event
+async deleteEvent() {
+  const eventId = document.getElementById("evtDate").getAttribute("data-event-id"); // Get event ID from the form
 
-    try {
-      await deleteDoc(doc(db, "events", eventId));
-      await this.fetchEvents();
-      this.closeForm();
-    } catch (error) {
-      console.error("Error deleting event:", error);
-    }
+  if (!eventId) {
+    alert("No event selected for deletion.");
+    return;
   }
+
+  try {
+    // Reference the event document in Firestore using eventId
+    const eventRef = doc(db, "events", eventId);
+
+    // Delete the event document
+    await deleteDoc(eventRef);
+    console.log(`Event with ID ${eventId} deleted successfully.`);
+
+    // Refresh events in the calendar
+    await this.fetchEvents();
+
+    // Close the form
+    this.closeForm();
+
+    
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    s
+  }
+}
+
 
   // Close Event Form
   closeForm() {
@@ -297,6 +336,7 @@ populateEventTypeDropdown(elementId, eventTypes, placeholder) {
     document.getElementById("evtPTO").value = "";
     document.getElementById("evtDate").removeAttribute("data-event-id");
   }
+  
   
 
   // Update UI based on user
@@ -387,19 +427,19 @@ const cal = {
   draw: function () {
     const wrap = this.hWrap;
     wrap.innerHTML = "";
-
+  
     const daysInMth = new Date(this.sYear, this.sMth + 1, 0).getDate();
     const startDay = new Date(this.sYear, this.sMth, 1).getDay();
-
+  
     let dayCounter = 1;
     for (let week = 0; week < 6; week++) {
       const row = document.createElement("div");
       row.className = "calRow";
-
+  
       for (let day = 0; day < 7; day++) {
         const cell = document.createElement("div");
         cell.className = "calCell";
-
+  
         if (week === 0 && day < startDay) {
           cell.classList.add("calBlank");
         } else if (dayCounter > daysInMth) {
@@ -409,32 +449,40 @@ const cal = {
           const cellDate = document.createElement("div");
           cellDate.className = "cellDate";
           cellDate.textContent = dayCounter;
-
+  
           cell.appendChild(cellDate);
+  
+          // Attach click listener for opening event form
           cell.addEventListener("click", () => eventHandler.openEventForm(date));
-
+  
+          // Render events
           if (this.data[date]) {
             const eventsContainer = document.createElement("div");
             eventsContainer.className = "eventsContainer";
-
+  
             this.data[date].forEach((event) => {
               const eventDiv = document.createElement("div");
               eventDiv.className = "evt";
               eventDiv.innerHTML = `${event.eventType}: ${event.userName}`;
+              eventDiv.addEventListener("click", (e) => {
+                e.stopPropagation(); // Prevent triggering parent click
+                eventHandler.openEventForm(date, event); // Pass event details
+              });
+  
               eventsContainer.appendChild(eventDiv);
             });
-
+  
             cell.appendChild(eventsContainer);
           }
-
+  
           dayCounter++;
         }
         row.appendChild(cell);
       }
       wrap.appendChild(row);
     }
-  },
-};
+  }
+}  
 
 // Initialize calendar and event handler
 let eventHandler;
