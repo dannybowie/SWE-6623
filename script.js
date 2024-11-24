@@ -518,6 +518,26 @@ const cal = {
               const eventDiv = document.createElement("div");
               eventDiv.className = "evt";
               eventDiv.innerHTML = `${event.eventType}: ${event.userName}`;
+
+              const eventTypeColors = {
+                "Employee Anniversary Date" : "#ffcccb",
+                "Employee Birthday" : "#ffff00",
+                "Company Events" : "#0077ff",
+                "Company Holidays" : "#ffa500",
+                "Out of the Office" : "#808080",
+                "Personal Time" : "#00ff00",
+                "Training" : "#fa18fa",
+                "Visitor" : "#bb12bb",
+                "Sick Day" : "#ff0000", 
+              };
+              
+  
+              // Apply background color based on event type
+              const eventColor = eventTypeColors[event.eventType] || "#f0f0f0"; // Default to light gray if no color is found
+              eventDiv.style.backgroundColor = eventColor;
+  
+              
+  
               eventDiv.addEventListener("click", (e) => {
                 e.stopPropagation(); // Prevent triggering parent click
                 eventHandler.openEventForm(date, event); // Pass event details
